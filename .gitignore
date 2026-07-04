@@ -17,6 +17,11 @@ backend/target/
 # Generated local document previews
 Agent_Study-简历导向需求与开发规划.html
 
+# Local planning documents
+Agent_Study-产品需求文档.md
+Agent_Study-简历导向需求与开发规划.md
+Agent_Study-系统技术架构设计书.md
+
 # OS files
 .DS_Store
 Thumbs.db
