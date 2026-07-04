@@ -1,0 +1,22 @@
+# Maven and Java build output
+target/
+backend/target/
+
+# Local dependency caches and downloaded tools
+.m2/
+.tools/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Generated local document previews
+Agent_Study-简历导向需求与开发规划.html
+
+# OS files
+.DS_Store
+Thumbs.db
