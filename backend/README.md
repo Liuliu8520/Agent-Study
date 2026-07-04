@@ -8,10 +8,23 @@ Spring Boot 后端服务目录。
 
 - 应用启动类：`com.agentstudy.AgentStudyApplication`
 - 健康检查接口：`GET /api/health`
+- 学习会话创建接口：`POST /api/learn/sessions`
+- 学习会话查询接口：`GET /api/learn/sessions/{sessionId}`
+- 诊断题生成接口：`POST /api/learn/sessions/{sessionId}/diagnosis/questions`
+- 诊断答案提交接口：`POST /api/learn/sessions/{sessionId}/diagnosis/submit`
+- 学习计划生成接口：`POST /api/learn/sessions/{sessionId}/plan`
+- RAG 微讲义生成接口：`POST /api/learn/sessions/{sessionId}/lesson`
+- 随堂练习生成接口：`POST /api/learn/sessions/{sessionId}/exercises`
+- 练习答案提交与判卷接口：`POST /api/learn/sessions/{sessionId}/exercises/submit`
+- 智能复习生成接口：`POST /api/learn/sessions/{sessionId}/review`
 - 统一响应结构：`ApiResponse`
 - 全局异常处理：`GlobalExceptionHandler`
+- 业务异常：`BusinessException`
+- 内存版学习状态仓库：`InMemoryLearningSessionRepository`
+- 学习流程编排器：`LearningOrchestrator`
 - 基础配置：`application.yml`
 - 启动上下文测试：`AgentStudyApplicationTests`
+- 学习会话接口测试：`LearningControllerTests`
 
 ## 本地运行
 
@@ -63,3 +76,67 @@ java -jar .\target\agent-study-backend-0.1.0-SNAPSHOT.jar
 - admin：后台登录、Prompt 管理、操作审计。
 - statistics：薄弱点统计、Agent 耗时统计、会话趋势。
 - log：学习会话快照、Agent 调用日志、操作日志查询。
+
+## 已实现接口
+
+创建学习会话：
+
+```http
+POST /api/learn/sessions
+```
+
+请求体：
+
+```json
+{
+  "studentName": "Alice"
+}
+```
+
+查询学习会话：
+
+```http
+GET /api/learn/sessions/{sessionId}
+```
+
+生成诊断题：
+
+```http
+POST /api/learn/sessions/{sessionId}/diagnosis/questions
+```
+
+提交诊断答案：
+
+```http
+POST /api/learn/sessions/{sessionId}/diagnosis/submit
+```
+
+生成学习计划：
+
+```http
+POST /api/learn/sessions/{sessionId}/plan
+```
+
+生成 RAG 微讲义：
+
+```http
+POST /api/learn/sessions/{sessionId}/lesson
+```
+
+生成随堂练习：
+
+```http
+POST /api/learn/sessions/{sessionId}/exercises
+```
+
+提交练习答案：
+
+```http
+POST /api/learn/sessions/{sessionId}/exercises/submit
+```
+
+生成智能复习结果：
+
+```http
+POST /api/learn/sessions/{sessionId}/review
+```

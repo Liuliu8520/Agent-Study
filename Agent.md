@@ -47,10 +47,23 @@ Implemented:
 
 - Spring Boot application entry.
 - `GET /api/health` health check.
+- `POST /api/learn/sessions` create learning session.
+- `GET /api/learn/sessions/{sessionId}` get learning session.
+- `POST /api/learn/sessions/{sessionId}/diagnosis/questions` generate Step 1 diagnosis questions.
+- `POST /api/learn/sessions/{sessionId}/diagnosis/submit` submit Step 1 diagnosis answers.
+- `POST /api/learn/sessions/{sessionId}/plan` generate Step 2 3-day learning plan.
+- `POST /api/learn/sessions/{sessionId}/lesson` generate Step 3 RAG-style Markdown micro-lesson.
+- `POST /api/learn/sessions/{sessionId}/exercises` generate Step 4 exercises.
+- `POST /api/learn/sessions/{sessionId}/exercises/submit` submit Step 4 expressions and auto-grade with exp4j.
+- `POST /api/learn/sessions/{sessionId}/review` generate Step 5 review or completion result.
 - Unified `ApiResponse`.
 - Global exception handler.
+- Business exception handling.
+- In-memory `LearningState` repository.
+- `LearningOrchestrator` for the first learning flow transitions.
 - Basic `application.yml`.
 - Context loading test.
+- Learning session API tests.
 
 Health check:
 
@@ -142,9 +155,10 @@ init backend skeleton and project docs
 
 Build the first real backend business module:
 
-- `learn` module.
-- Create learning session API.
-- Define `LearningState`.
-- Add simple in-memory session service first.
-- Then connect MySQL and Redis in the next phase.
-
+- Persist `LearningState` into MySQL and active sessions into Redis.
+- Replace in-memory knowledge chunks with persisted `knowledge_chunk` records.
+- Replace keyword retrieval with embedding/vector search.
+- Replace deterministic planner logic with `PlannerAgent`.
+- Replace deterministic diagnosis logic with `DiagnosticianAgent`.
+- Connect MySQL for final session persistence.
+- Connect Redis for active `LearningState` caching.
