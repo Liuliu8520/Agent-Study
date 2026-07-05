@@ -34,6 +34,7 @@ Agent_Study/
 - Step 2 学习计划生成已接入 `planner.three-day` Agent 调用日志
 - Step 3 RAG 微讲义生成已接入 `lesson.micro` Agent 调用日志
 - Step 4 练习题生成已接入 `exercise.generate` Agent 调用日志
+- Step 5 智能复习生成已接入 `review.feedback` Agent 调用日志
 
 ## 后端运行
 

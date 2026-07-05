@@ -375,6 +375,13 @@ class LearningControllerTests {
         );
         assertThat(getResponse.getBody().path("data").path("status").asText()).isEqualTo("FINISHED");
         assertThat(getResponse.getBody().path("data").path("nextAction").asText()).isEqualTo("finished");
+
+        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+                "/api/agent/call-logs?limit=10",
+                JsonNode.class
+        );
+        assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
+        assertThat(logResponse.getBody().path("data").toString()).contains("review.feedback");
     }
 
     @Test

@@ -64,6 +64,7 @@ Implemented:
 - Step 2 learning plan generation now invokes the `planner.three-day` Mock Agent and records AgentCallLog.
 - Step 3 micro-lesson generation now invokes the `lesson.micro` Mock Agent and records AgentCallLog.
 - Step 4 exercise generation now invokes the `exercise.generate` Mock Agent and records AgentCallLog.
+- Step 5 review generation now invokes the `review.feedback` Mock Agent and records AgentCallLog.
 - Context loading, API flow, and JSON snapshot codec tests.
 
 ## Local Commands

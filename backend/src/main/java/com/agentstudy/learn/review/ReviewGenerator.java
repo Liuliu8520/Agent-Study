@@ -8,7 +8,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReviewGenerator {
 
-    public ReviewResult generate(List<ExerciseJudgeResult> exerciseResults) {
+    private final ReviewAgentService reviewAgentService;
+
+    public ReviewGenerator(ReviewAgentService reviewAgentService) {
+        this.reviewAgentService = reviewAgentService;
+    }
+
+    public ReviewResult generate(String sessionId, List<ExerciseJudgeResult> exerciseResults) {
+        reviewAgentService.generateDraft(sessionId, exerciseResults);
         if (exerciseResults == null || exerciseResults.isEmpty()) {
             return new ReviewResult(
                     ReviewStatus.REVIEW_SUGGESTED,
@@ -101,4 +108,3 @@ public class ReviewGenerator {
         );
     }
 }
-

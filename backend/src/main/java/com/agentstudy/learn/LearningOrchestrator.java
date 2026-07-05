@@ -245,7 +245,7 @@ public class LearningOrchestrator {
             throw BusinessException.badRequest("Exercise results have not been generated");
         }
 
-        ReviewResult reviewResult = reviewGenerator.generate(state.getExerciseResults());
+        ReviewResult reviewResult = reviewGenerator.generate(state.getSessionId(), state.getExerciseResults());
         state.finish(reviewResult);
         repository.save(state);
 
