@@ -247,7 +247,16 @@ class LearningControllerTests {
         assertThat(data.path("nextAction").asText()).isEqualTo("exercises");
         assertThat(data.path("lessonMarkdown").asText()).contains("个性化高数微讲义");
         assertThat(data.path("lessonMarkdown").asText()).contains("链式法则");
+        assertThat(data.path("lessonMarkdown").asText()).contains("Agent 辅助生成摘要");
+        assertThat(data.path("lessonMarkdown").asText()).contains("Mock讲义");
         assertThat(data.path("retrievedChunks").size()).isGreaterThan(0);
+
+        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+                "/api/agent/call-logs?limit=10",
+                JsonNode.class
+        );
+        assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
+        assertThat(logResponse.getBody().path("data").toString()).contains("lesson.micro");
     }
 
     @Test

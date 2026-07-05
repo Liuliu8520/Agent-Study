@@ -10,11 +10,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class MicroLessonGenerator {
 
+    private final MicroLessonAgentService microLessonAgentService;
+
+    public MicroLessonGenerator(MicroLessonAgentService microLessonAgentService) {
+        this.microLessonAgentService = microLessonAgentService;
+    }
+
     public String generate(
+            String sessionId,
             LearningPlan plan,
             List<WeakPoint> weakPoints,
             List<RetrievedKnowledgeChunk> chunks
     ) {
+        String agentDraft = microLessonAgentService.generateDraft(sessionId, plan, weakPoints, chunks).outputText();
+
         StringBuilder markdown = new StringBuilder();
         markdown.append("# 个性化高数微讲义\n\n");
         markdown.append("## 学习目标\n\n");
@@ -26,6 +35,9 @@ public class MicroLessonGenerator {
         } else {
             markdown.append("- 本讲义用于巩固极限、导数和积分的基础能力\n");
         }
+
+        markdown.append("\n## Agent 辅助生成摘要\n\n");
+        markdown.append(agentDraft).append("\n");
 
         markdown.append("\n## 核心知识\n\n");
         for (RetrievedKnowledgeChunk chunk : chunks) {
@@ -52,4 +64,3 @@ public class MicroLessonGenerator {
         return markdown.toString();
     }
 }
-

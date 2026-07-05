@@ -156,7 +156,12 @@ public class LearningOrchestrator {
         }
 
         List<RetrievedKnowledgeChunk> retrievedChunks = ragService.retrieve(state.getWeakPoints(), state.getLearningPlan());
-        String lessonMarkdown = microLessonGenerator.generate(state.getLearningPlan(), state.getWeakPoints(), retrievedChunks);
+        String lessonMarkdown = microLessonGenerator.generate(
+                state.getSessionId(),
+                state.getLearningPlan(),
+                state.getWeakPoints(),
+                retrievedChunks
+        );
         state.setRetrievedChunks(retrievedChunks);
         state.setGeneratedLesson(lessonMarkdown);
         state.advanceToStep(4);
