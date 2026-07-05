@@ -50,6 +50,39 @@ public class LearningState {
         return new LearningState(sessionId, studentName, Instant.now());
     }
 
+    public static LearningState restore(
+            String sessionId,
+            String studentName,
+            Instant createdAt,
+            int currentStep,
+            LearningSessionStatus status,
+            Instant updatedAt,
+            List<DiagnosisQuestion> diagnosisQuestions,
+            Map<String, String> diagnosisAnswers,
+            List<WeakPoint> weakPoints,
+            LearningPlan learningPlan,
+            String generatedLesson,
+            List<RetrievedKnowledgeChunk> retrievedChunks,
+            List<ExerciseQuestion> exercises,
+            List<ExerciseJudgeResult> exerciseResults,
+            ReviewResult reviewResult
+    ) {
+        LearningState state = new LearningState(sessionId, studentName, createdAt);
+        state.currentStep = currentStep;
+        state.status = status;
+        state.updatedAt = updatedAt;
+        state.diagnosisQuestions = diagnosisQuestions == null ? new ArrayList<>() : new ArrayList<>(diagnosisQuestions);
+        state.diagnosisAnswers = diagnosisAnswers == null ? new LinkedHashMap<>() : new LinkedHashMap<>(diagnosisAnswers);
+        state.weakPoints = weakPoints == null ? new ArrayList<>() : new ArrayList<>(weakPoints);
+        state.learningPlan = learningPlan;
+        state.generatedLesson = generatedLesson;
+        state.retrievedChunks = retrievedChunks == null ? new ArrayList<>() : new ArrayList<>(retrievedChunks);
+        state.exercises = exercises == null ? new ArrayList<>() : new ArrayList<>(exercises);
+        state.exerciseResults = exerciseResults == null ? new ArrayList<>() : new ArrayList<>(exerciseResults);
+        state.reviewResult = reviewResult;
+        return state;
+    }
+
     public void markInProgress() {
         this.status = LearningSessionStatus.IN_PROGRESS;
         touch();

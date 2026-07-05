@@ -16,32 +16,26 @@ Core learning flow:
 
 ## Architecture
 
-The project uses a frontend-backend separated architecture.
-
 ```text
 Agent_Study/
 ├── backend/   Spring Boot backend
-├── frontend/  Vue3 frontend
-├── docker/    Local infrastructure configs
+├── frontend/  Vue3 frontend placeholder
+├── docker/    MySQL and Redis local infrastructure
 ├── docs/      API, database, and prompt documents
 └── README.md
 ```
 
 Backend modules:
 
-- common: unified response, exceptions, pagination, utilities.
-- config: Spring, MyBatis, Redis, WebClient configuration.
-- security: Spring Security, JWT, admin authentication.
-- learn: learning sessions, LearningState, LearningOrchestrator.
-- agent: LLM client, PromptService, agents, call logs.
-- rag: knowledge chunks, embeddings, vector search.
-- admin: admin login, prompt management, operation audit.
-- statistics: weak point stats, agent duration stats.
-- log: session snapshots, agent call logs, operation logs.
+- common: unified response and exception handling.
+- learn: learning sessions, `LearningState`, `LearningOrchestrator`.
+- learn.persistence: MySQL snapshot storage and Redis session cache.
+- rag: in-memory knowledge chunks and keyword retrieval for the P0 RAG entry.
+- agent: planned LLM client, PromptService, agents, and call logs.
+- admin: planned admin login and prompt management.
+- statistics: planned weak point and Agent call statistics.
 
 ## Current Backend Status
-
-The backend currently has a minimal runnable Spring Boot skeleton.
 
 Implemented:
 
@@ -56,47 +50,13 @@ Implemented:
 - `POST /api/learn/sessions/{sessionId}/exercises` generate Step 4 exercises.
 - `POST /api/learn/sessions/{sessionId}/exercises/submit` submit Step 4 expressions and auto-grade with exp4j.
 - `POST /api/learn/sessions/{sessionId}/review` generate Step 5 review or completion result.
-- Unified `ApiResponse`.
-- Global exception handler.
-- Business exception handling.
-- In-memory `LearningState` repository.
-- `LearningOrchestrator` for the first learning flow transitions.
-- Basic `application.yml`.
-- Context loading test.
-- Learning session API tests.
-
-Health check:
-
-```text
-GET http://localhost:8080/api/health
-```
-
-Expected response:
-
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "status": "ok",
-    "service": "agent-study-backend"
-  }
-}
-```
+- Default in-memory learning session repository.
+- `dev` profile MySQL + Redis learning session repository.
+- MySQL `learning_session` table auto initialization.
+- Redis cache key: `agent-study:learning-session:{sessionId}`.
+- Context loading, API flow, and JSON snapshot codec tests.
 
 ## Local Commands
-
-Java version:
-
-```powershell
-java -version
-```
-
-Maven path on this machine:
-
-```powershell
-C:\Maven\apache-maven-3.8.2\bin\mvn.cmd
-```
 
 Run backend tests:
 
@@ -105,40 +65,37 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" test
 ```
 
-Run backend:
+Run backend with in-memory repository:
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run
 ```
 
-Package backend:
+Run backend with MySQL and Redis:
 
 ```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
+docker compose -f .\docker\docker-compose.yml up -d
+
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" package
-```
-
-Run packaged jar:
-
-```powershell
-java -jar .\target\agent-study-backend-0.1.0-SNAPSHOT.jar
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 ## Development Rules
 
 - Keep the backend modular but do not split microservices in the first phase.
-- Prioritize a complete P0 learning flow before adding optional features.
-- Do not hardcode real API keys, JWT secrets, database passwords, or LLM credentials.
+- Prioritize a complete P0 learning flow before optional features.
+- Do not commit real API keys, JWT secrets, database passwords, or LLM credentials.
 - Do not commit local caches, downloaded tools, build outputs, or IDE metadata.
+- Use Chinese commit messages from this point forward.
 - Agent prompts should eventually be stored in MySQL and managed by `PromptService`.
 - Agent input/output should use DTOs instead of raw maps.
-- LLM calls must eventually be logged through `agent_call_log`.
-- Learning flow state should eventually be coordinated by `LearningOrchestrator`.
+- LLM calls should eventually be logged through `agent_call_log`.
 
 ## Git Notes
 
-Recommended remotes:
+Remotes:
 
 ```text
 origin  -> https://github.com/Liuliu8520/Agent-Study.git
@@ -148,17 +105,14 @@ gitee   -> https://gitee.com/liu-liu-37/agent-study.git
 Recommended commit style:
 
 ```text
-init backend skeleton and project docs
+实现学习会话 MySQL 和 Redis 持久化
 ```
 
 ## Next Milestone
 
-Build the first real backend business module:
-
-- Persist `LearningState` into MySQL and active sessions into Redis.
-- Replace in-memory knowledge chunks with persisted `knowledge_chunk` records.
+- Add real `knowledge_chunk` persistence.
 - Replace keyword retrieval with embedding/vector search.
+- Add `PromptService` and prompt template table.
 - Replace deterministic planner logic with `PlannerAgent`.
 - Replace deterministic diagnosis logic with `DiagnosticianAgent`.
-- Connect MySQL for final session persistence.
-- Connect Redis for active `LearningState` caching.
+- Add `agent_call_log` for LLM call observability.

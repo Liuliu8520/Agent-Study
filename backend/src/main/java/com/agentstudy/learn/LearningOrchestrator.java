@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LearningOrchestrator {
 
-    private final InMemoryLearningSessionRepository repository;
+    private final LearningSessionRepository repository;
     private final DiagnosisQuestionBank diagnosisQuestionBank;
     private final LearningPlanGenerator learningPlanGenerator;
     private final SimpleRagService simpleRagService;
@@ -51,7 +51,7 @@ public class LearningOrchestrator {
     private final ReviewGenerator reviewGenerator;
 
     public LearningOrchestrator(
-            InMemoryLearningSessionRepository repository,
+            LearningSessionRepository repository,
             DiagnosisQuestionBank diagnosisQuestionBank,
             LearningPlanGenerator learningPlanGenerator,
             SimpleRagService simpleRagService,

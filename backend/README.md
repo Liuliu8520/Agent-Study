@@ -1,142 +1,86 @@
 # Backend
 
-Spring Boot 后端服务目录。
+Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 
 ## 当前状态
 
-已完成最小可运行 Spring Boot 后端骨架：
+已完成学生端 P0 学习闭环：
 
-- 应用启动类：`com.agentstudy.AgentStudyApplication`
-- 健康检查接口：`GET /api/health`
-- 学习会话创建接口：`POST /api/learn/sessions`
-- 学习会话查询接口：`GET /api/learn/sessions/{sessionId}`
-- 诊断题生成接口：`POST /api/learn/sessions/{sessionId}/diagnosis/questions`
-- 诊断答案提交接口：`POST /api/learn/sessions/{sessionId}/diagnosis/submit`
-- 学习计划生成接口：`POST /api/learn/sessions/{sessionId}/plan`
-- RAG 微讲义生成接口：`POST /api/learn/sessions/{sessionId}/lesson`
-- 随堂练习生成接口：`POST /api/learn/sessions/{sessionId}/exercises`
-- 练习答案提交与判卷接口：`POST /api/learn/sessions/{sessionId}/exercises/submit`
-- 智能复习生成接口：`POST /api/learn/sessions/{sessionId}/review`
-- 统一响应结构：`ApiResponse`
-- 全局异常处理：`GlobalExceptionHandler`
-- 业务异常：`BusinessException`
-- 内存版学习状态仓库：`InMemoryLearningSessionRepository`
-- 学习流程编排器：`LearningOrchestrator`
-- 基础配置：`application.yml`
-- 启动上下文测试：`AgentStudyApplicationTests`
-- 学习会话接口测试：`LearningControllerTests`
+- `GET /api/health` 健康检查
+- `POST /api/learn/sessions` 创建学习会话
+- `GET /api/learn/sessions/{sessionId}` 查询学习会话
+- `POST /api/learn/sessions/{sessionId}/diagnosis/questions` Step 1 生成诊断题
+- `POST /api/learn/sessions/{sessionId}/diagnosis/submit` Step 1 提交诊断答案
+- `POST /api/learn/sessions/{sessionId}/plan` Step 2 生成 3 天学习计划
+- `POST /api/learn/sessions/{sessionId}/lesson` Step 3 生成 RAG 微讲义
+- `POST /api/learn/sessions/{sessionId}/exercises` Step 4 生成练习题
+- `POST /api/learn/sessions/{sessionId}/exercises/submit` Step 4 表达式自动判卷
+- `POST /api/learn/sessions/{sessionId}/review` Step 5 生成智能复习或结业结果
 
-## 本地运行
+持久化状态：
 
-当前机器可使用 C 盘 Maven：
+- 默认 profile 使用 `InMemoryLearningSessionRepository`，方便本地测试和快速启动。
+- `dev` profile 使用 `MySqlRedisLearningSessionRepository`，MySQL 保存 `LearningState` 快照，Redis 缓存热点会话。
+- MySQL 表结构见 `src/main/resources/db/schema-mysql.sql`，dev 仓库启动时会自动建表。
+
+## 运行测试
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" test
+```
+
+## 默认内存模式启动
+
+不依赖 MySQL/Redis：
+
+```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run
 ```
 
-启动后访问：
+健康检查：
 
 ```text
-http://localhost:8080/api/health
+GET http://localhost:8080/api/health
 ```
 
-预期响应：
+## MySQL/Redis 模式启动
 
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "status": "ok",
-    "service": "agent-study-backend"
-  }
-}
+先启动本地基础设施：
+
+```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
+docker compose -f .\docker\docker-compose.yml up -d
 ```
 
-也可以先打包再运行：
+再启用 `dev` profile：
+
+```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+默认连接信息：
+
+- MySQL: `localhost:3306/agent_study`
+- MySQL 用户名: `root`
+- MySQL 密码: `agentstudy`
+- Redis: `localhost:6379`
+
+可通过环境变量覆盖：
+
+- `AGENT_STUDY_MYSQL_URL`
+- `AGENT_STUDY_MYSQL_USERNAME`
+- `AGENT_STUDY_MYSQL_PASSWORD`
+- `AGENT_STUDY_REDIS_HOST`
+- `AGENT_STUDY_REDIS_PORT`
+- `AGENT_STUDY_REDIS_DATABASE`
+
+## 打包运行
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" package
 java -jar .\target\agent-study-backend-0.1.0-SNAPSHOT.jar
-```
-
-## 模块规划
-
-计划模块：
-
-- common：统一响应、异常处理、分页与工具类。
-- config：Spring、MyBatis、Redis、WebClient 等配置。
-- security：Spring Security、JWT、管理员鉴权。
-- learn：学生端学习流程、LearningState、LearningOrchestrator。
-- agent：LLM 调用、PromptService、5 个 Agent、调用日志。
-- rag：知识库切片、Embedding、向量检索。
-- admin：后台登录、Prompt 管理、操作审计。
-- statistics：薄弱点统计、Agent 耗时统计、会话趋势。
-- log：学习会话快照、Agent 调用日志、操作日志查询。
-
-## 已实现接口
-
-创建学习会话：
-
-```http
-POST /api/learn/sessions
-```
-
-请求体：
-
-```json
-{
-  "studentName": "Alice"
-}
-```
-
-查询学习会话：
-
-```http
-GET /api/learn/sessions/{sessionId}
-```
-
-生成诊断题：
-
-```http
-POST /api/learn/sessions/{sessionId}/diagnosis/questions
-```
-
-提交诊断答案：
-
-```http
-POST /api/learn/sessions/{sessionId}/diagnosis/submit
-```
-
-生成学习计划：
-
-```http
-POST /api/learn/sessions/{sessionId}/plan
-```
-
-生成 RAG 微讲义：
-
-```http
-POST /api/learn/sessions/{sessionId}/lesson
-```
-
-生成随堂练习：
-
-```http
-POST /api/learn/sessions/{sessionId}/exercises
-```
-
-提交练习答案：
-
-```http
-POST /api/learn/sessions/{sessionId}/exercises/submit
-```
-
-生成智能复习结果：
-
-```http
-POST /api/learn/sessions/{sessionId}/review
 ```

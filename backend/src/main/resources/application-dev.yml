@@ -1,0 +1,15 @@
+agent-study:
+  persistence:
+    cache-ttl-minutes: 120
+    mysql:
+      url: ${AGENT_STUDY_MYSQL_URL:jdbc:mysql://localhost:3306/agent_study?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+      username: ${AGENT_STUDY_MYSQL_USERNAME:root}
+      password: ${AGENT_STUDY_MYSQL_PASSWORD:agentstudy}
+
+spring:
+  data:
+    redis:
+      host: ${AGENT_STUDY_REDIS_HOST:localhost}
+      port: ${AGENT_STUDY_REDIS_PORT:6379}
+      database: ${AGENT_STUDY_REDIS_DATABASE:0}
+      timeout: 2s
