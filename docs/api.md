@@ -119,6 +119,14 @@ Content-Type: application/json
 
 后端使用表达式采样比对进行自动判卷。
 
+### 查询练习提交记录
+
+```http
+GET /api/learn/sessions/{sessionId}/exercise-attempts
+```
+
+返回该学习会话的练习提交记录，包含正确数、总题数、错误率、判卷明细和提交时间。
+
 ### Step 5 生成复习或结业结果
 
 ```http

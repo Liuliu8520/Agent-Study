@@ -4,6 +4,7 @@ import com.agentstudy.common.ApiResponse;
 import com.agentstudy.learn.dto.CreateLearningSessionRequest;
 import com.agentstudy.learn.dto.DiagnosisQuestionSetResponse;
 import com.agentstudy.learn.dto.DiagnosisResultResponse;
+import com.agentstudy.learn.dto.ExerciseAttemptResponse;
 import com.agentstudy.learn.dto.ExerciseQuestionSetResponse;
 import com.agentstudy.learn.dto.ExerciseSubmitResponse;
 import com.agentstudy.learn.dto.LearningPlanResponse;
@@ -87,6 +88,11 @@ public class LearningController {
             @Valid @RequestBody SubmitExerciseRequest request
     ) {
         return ApiResponse.success(learningService.submitExercises(sessionId, request));
+    }
+
+    @GetMapping("/{sessionId}/exercise-attempts")
+    public ApiResponse<List<ExerciseAttemptResponse>> listExerciseAttempts(@PathVariable String sessionId) {
+        return ApiResponse.success(learningService.listExerciseAttempts(sessionId));
     }
 
     @PostMapping("/{sessionId}/review")

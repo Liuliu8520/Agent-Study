@@ -3,6 +3,7 @@ package com.agentstudy.learn;
 import com.agentstudy.learn.dto.CreateLearningSessionRequest;
 import com.agentstudy.learn.dto.DiagnosisQuestionSetResponse;
 import com.agentstudy.learn.dto.DiagnosisResultResponse;
+import com.agentstudy.learn.dto.ExerciseAttemptResponse;
 import com.agentstudy.learn.dto.ExerciseQuestionSetResponse;
 import com.agentstudy.learn.dto.ExerciseSubmitResponse;
 import com.agentstudy.learn.dto.LearningPlanResponse;
@@ -61,6 +62,10 @@ public class LearningService {
 
     public ExerciseSubmitResponse submitExercises(String sessionId, SubmitExerciseRequest request) {
         return learningOrchestrator.submitExercises(sessionId, request);
+    }
+
+    public List<ExerciseAttemptResponse> listExerciseAttempts(String sessionId) {
+        return learningOrchestrator.listExerciseAttempts(sessionId);
     }
 
     public ReviewResponse generateReview(String sessionId) {

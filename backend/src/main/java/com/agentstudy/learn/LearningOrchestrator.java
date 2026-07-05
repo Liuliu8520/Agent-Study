@@ -6,6 +6,7 @@ import com.agentstudy.learn.diagnosis.DiagnosisQuestion;
 import com.agentstudy.learn.diagnosis.DiagnosisQuestionBank;
 import com.agentstudy.learn.diagnosis.WeakPoint;
 import com.agentstudy.learn.dto.ExerciseAnswerRequest;
+import com.agentstudy.learn.dto.ExerciseAttemptResponse;
 import com.agentstudy.learn.dto.ExerciseJudgeResultResponse;
 import com.agentstudy.learn.dto.ExerciseQuestionResponse;
 import com.agentstudy.learn.dto.ExerciseQuestionSetResponse;
@@ -25,6 +26,8 @@ import com.agentstudy.learn.dto.VariantExerciseResponse;
 import com.agentstudy.learn.plan.LearningPlan;
 import com.agentstudy.learn.plan.LearningPlanGenerator;
 import com.agentstudy.learn.lesson.MicroLessonGenerator;
+import com.agentstudy.learn.exercise.ExerciseAttempt;
+import com.agentstudy.learn.exercise.ExerciseAttemptRepository;
 import com.agentstudy.learn.exercise.ExerciseGenerator;
 import com.agentstudy.learn.exercise.ExerciseJudgeResult;
 import com.agentstudy.learn.exercise.ExerciseQuestion;
@@ -33,6 +36,7 @@ import com.agentstudy.learn.review.ReviewGenerator;
 import com.agentstudy.learn.review.ReviewResult;
 import com.agentstudy.rag.RetrievedKnowledgeChunk;
 import com.agentstudy.rag.RagService;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +55,7 @@ public class LearningOrchestrator {
     private final MicroLessonGenerator microLessonGenerator;
     private final ExerciseGenerator exerciseGenerator;
     private final ExpressionJudgeService expressionJudgeService;
+    private final ExerciseAttemptRepository exerciseAttemptRepository;
     private final ReviewGenerator reviewGenerator;
 
     public LearningOrchestrator(
@@ -62,6 +67,7 @@ public class LearningOrchestrator {
             MicroLessonGenerator microLessonGenerator,
             ExerciseGenerator exerciseGenerator,
             ExpressionJudgeService expressionJudgeService,
+            ExerciseAttemptRepository exerciseAttemptRepository,
             ReviewGenerator reviewGenerator
     ) {
         this.repository = repository;
@@ -72,6 +78,7 @@ public class LearningOrchestrator {
         this.microLessonGenerator = microLessonGenerator;
         this.exerciseGenerator = exerciseGenerator;
         this.expressionJudgeService = expressionJudgeService;
+        this.exerciseAttemptRepository = exerciseAttemptRepository;
         this.reviewGenerator = reviewGenerator;
     }
 
@@ -248,6 +255,15 @@ public class LearningOrchestrator {
                 .map(ExerciseJudgeResultResponse::from)
                 .toList();
         double errorRate = results.isEmpty() ? 0 : (double) (results.size() - correctCount) / results.size();
+        exerciseAttemptRepository.save(new ExerciseAttempt(
+                UUID.randomUUID().toString(),
+                state.getSessionId(),
+                correctCount,
+                results.size(),
+                errorRate,
+                results,
+                Instant.now()
+        ));
         return new ExerciseSubmitResponse(
                 state.getSessionId(),
                 correctCount,
@@ -257,6 +273,13 @@ public class LearningOrchestrator {
                 state.getCurrentStep(),
                 "review"
         );
+    }
+
+    public List<ExerciseAttemptResponse> listExerciseAttempts(String sessionId) {
+        getRequiredState(sessionId);
+        return exerciseAttemptRepository.findBySessionId(sessionId).stream()
+                .map(ExerciseAttemptResponse::from)
+                .toList();
     }
 
     public ReviewResponse generateReview(String sessionId) {

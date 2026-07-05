@@ -16,6 +16,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `POST /api/learn/sessions/{sessionId}/lesson` Step 3 生成 RAG 微讲义
 - `POST /api/learn/sessions/{sessionId}/exercises` Step 4 生成练习题
 - `POST /api/learn/sessions/{sessionId}/exercises/submit` Step 4 表达式自动判卷
+- `GET /api/learn/sessions/{sessionId}/exercise-attempts` 查询练习提交记录
 - `POST /api/learn/sessions/{sessionId}/review` Step 5 生成智能复习或结业结果
 - `GET /api/agent/prompts` 查询默认 Prompt 模板
 - `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板
@@ -29,6 +30,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 
 - 默认 profile 使用 `InMemoryLearningSessionRepository`，方便本地测试和快速启动。
 - `dev` profile 使用 `MySqlRedisLearningSessionRepository`，MySQL 保存 `LearningState` 快照，Redis 缓存热点会话。
+- `dev` profile 使用 MySQL 保存 `exercise_attempt`，默认 profile 使用内存练习提交记录仓库。
 - `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
 - `dev` profile 使用 MySQL 保存 `prompt_template`，默认 profile 使用内存 Prompt 模板仓库。
 - `dev` profile 使用 MySQL 保存 `knowledge_chunk`，表为空时自动写入默认高数切片。

@@ -25,6 +25,7 @@ Agent_Study/
 - Step 2 根据弱点生成 3 天学习计划
 - Step 3 RAG 微讲义生成入口
 - Step 4 练习题生成与表达式自动判卷
+- `exercise_attempt` 持久化练习提交记录和判卷明细
 - Step 5 智能复习或结业结果生成
 - MySQL 持久化 `LearningState` 快照
 - Redis 缓存热点学习会话

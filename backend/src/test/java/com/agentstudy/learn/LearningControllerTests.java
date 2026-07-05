@@ -353,6 +353,19 @@ class LearningControllerTests {
         assertThat(data.path("currentStep").asInt()).isEqualTo(5);
         assertThat(data.path("nextAction").asText()).isEqualTo("review");
         assertThat(data.path("results").get(2).path("correct").asBoolean()).isTrue();
+
+        ResponseEntity<JsonNode> attemptsResponse = restTemplate.getForEntity(
+                "/api/learn/sessions/{sessionId}/exercise-attempts",
+                JsonNode.class,
+                sessionId
+        );
+        assertThat(attemptsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode attempts = attemptsResponse.getBody().path("data");
+        assertThat(attempts.size()).isEqualTo(1);
+        assertThat(attempts.get(0).path("sessionId").asText()).isEqualTo(sessionId);
+        assertThat(attempts.get(0).path("correctCount").asInt()).isEqualTo(3);
+        assertThat(attempts.get(0).path("totalCount").asInt()).isEqualTo(3);
+        assertThat(attempts.get(0).path("results").size()).isEqualTo(3);
     }
 
     @Test

@@ -39,6 +39,17 @@ CREATE TABLE IF NOT EXISTS prompt_template (
     KEY idx_prompt_template_agent_type (agent_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS exercise_attempt (
+    attempt_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'exercise attempt id',
+    session_id VARCHAR(64) NOT NULL COMMENT 'learning session id',
+    correct_count INT NOT NULL COMMENT 'correct answer count',
+    total_count INT NOT NULL COMMENT 'total exercise count',
+    error_rate DOUBLE NOT NULL COMMENT 'exercise error rate',
+    results_json JSON NOT NULL COMMENT 'exercise judge results',
+    submitted_at DATETIME(6) NOT NULL COMMENT 'submitted time',
+    KEY idx_exercise_attempt_session_submitted (session_id, submitted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS knowledge_chunk (
     chunk_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'knowledge chunk id',
     chapter VARCHAR(100) NOT NULL COMMENT 'chapter name',

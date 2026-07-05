@@ -52,10 +52,12 @@ Implemented:
 - `POST /api/learn/sessions/{sessionId}/lesson` generate Step 3 RAG-style Markdown micro-lesson.
 - `POST /api/learn/sessions/{sessionId}/exercises` generate Step 4 exercises.
 - `POST /api/learn/sessions/{sessionId}/exercises/submit` submit Step 4 expressions and auto-grade with exp4j.
+- `GET /api/learn/sessions/{sessionId}/exercise-attempts` list persisted exercise attempts.
 - `POST /api/learn/sessions/{sessionId}/review` generate Step 5 review or completion result.
 - Default in-memory learning session repository.
 - `dev` profile MySQL + Redis learning session repository.
 - MySQL `learning_session` table auto initialization.
+- MySQL `exercise_attempt` table auto initialization.
 - Redis cache key: `agent-study:learning-session:{sessionId}`.
 - `PromptService` with 5 default Agent prompt templates.
 - Prompt templates can be stored in MySQL through `prompt_template` and updated through `/api/agent/prompts/{code}`.

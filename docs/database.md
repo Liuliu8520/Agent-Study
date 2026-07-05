@@ -1,8 +1,9 @@
 # 数据库设计
 
-当前阶段已经落地四类核心数据：
+当前阶段已经落地五类核心数据：
 
 - 学习会话状态快照：支撑学生端 5 步学习闭环的恢复和查询。
+- 练习提交记录：沉淀学生练习答案、判卷结果和错误率。
 - Agent 调用日志：支撑 Prompt、模型输入输出、耗时和失败原因追踪。
 - Prompt 模板：支撑 Agent Prompt 的持久化和在线更新。
 - RAG 知识切片：支撑微讲义生成前的关键词召回。
@@ -69,6 +70,24 @@
 
 - `idx_prompt_template_agent_type`: 按 Agent 类型筛选 Prompt 模板。
 
+## exercise_attempt
+
+用途：保存一次练习提交记录和判卷明细，便于后续做错题本、学习报告和历史趋势分析。
+
+字段：
+
+- `attempt_id`: 练习提交 ID，主键。
+- `session_id`: 学习会话 ID。
+- `correct_count`: 答对题数。
+- `total_count`: 总题数。
+- `error_rate`: 错误率。
+- `results_json`: 完整判卷结果 JSON，包含题目 ID、学生答案、标准答案、是否正确和判卷详情。
+- `submitted_at`: 提交时间。
+
+索引：
+
+- `idx_exercise_attempt_session_submitted`: 按学习会话查看提交历史。
+
 ## knowledge_chunk
 
 用途：保存高数知识库切片，供 RAG 检索使用。
@@ -115,6 +134,5 @@ Value：`LearningState` JSON 快照。
 
 ## 后续规划表
 
-- `exercise_attempt`: 单次练习提交记录和判卷明细。
 - `admin_user`: 管理员账号。
 - `operation_log`: 后台操作审计。
