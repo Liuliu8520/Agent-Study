@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +96,23 @@ public class MySqlRedisLearningSessionRepository implements LearningSessionRepos
         Optional<String> stateJson = findJsonFromMysql(sessionId);
         stateJson.ifPresent(json -> cache(sessionId, json));
         return stateJson.map(jsonCodec::decode);
+    }
+
+    @Override
+    public List<LearningState> findAll() {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT state_json FROM learning_session ORDER BY updated_at DESC"
+             );
+             ResultSet resultSet = statement.executeQuery()) {
+            List<LearningState> states = new ArrayList<>();
+            while (resultSet.next()) {
+                states.add(jsonCodec.decode(resultSet.getString("state_json")));
+            }
+            return states;
+        } catch (SQLException exception) {
+            throw new IllegalStateException("Failed to list learning sessions", exception);
+        }
     }
 
     @Override

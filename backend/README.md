@@ -22,6 +22,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `GET /api/agent/call-logs` 查询 Agent 调用日志
 - `GET /api/rag/chunks` 查询 RAG 知识切片
 - `POST /api/rag/retrieve` 按关键词检索知识切片
+- `GET /api/statistics/dashboard` 查询学习会话、薄弱点和 Agent 调用统计
 
 持久化状态：
 

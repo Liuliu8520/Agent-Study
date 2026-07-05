@@ -33,6 +33,7 @@ Backend modules:
 - agent: PromptService, Mock LLM Client, AgentCallLog, and Agent debug APIs.
 - rag: knowledge chunks, repository abstraction, and keyword retrieval for the P0 RAG entry.
 - rag.persistence: MySQL knowledge chunk repository for dev profile.
+- statistics: learning session, weak point, and Agent call dashboard APIs.
 - admin: planned admin login and prompt management.
 - statistics: planned weak point and Agent call statistics.
 
@@ -62,6 +63,7 @@ Implemented:
 - Agent debug APIs under `/api/agent`.
 - `knowledge_chunk` repository abstraction with default in-memory storage and dev MySQL storage.
 - RAG debug APIs under `/api/rag`.
+- Statistics dashboard API under `/api/statistics/dashboard`.
 - Step 1 diagnosis result analysis now invokes the `diagnosis.default` Mock Agent and records AgentCallLog.
 - Step 2 learning plan generation now invokes the `planner.three-day` Mock Agent and records AgentCallLog.
 - Step 3 micro-lesson generation now invokes the `lesson.micro` Mock Agent and records AgentCallLog.
