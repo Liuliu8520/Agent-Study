@@ -64,9 +64,13 @@ public class AgentController {
 
     @GetMapping("/call-logs")
     public ApiResponse<List<AgentCallLogResponse>> listCallLogs(
-            @RequestParam(defaultValue = "20") int limit
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(required = false) String sessionId,
+            @RequestParam(required = false) AgentType agentType,
+            @RequestParam(required = false) AgentCallStatus status,
+            @RequestParam(required = false) String promptCode
     ) {
-        List<AgentCallLogResponse> logs = callLogService.findLatest(limit).stream()
+        List<AgentCallLogResponse> logs = callLogService.search(limit, sessionId, agentType, status, promptCode).stream()
                 .map(AgentCallLogResponse::from)
                 .toList();
         return ApiResponse.success(logs);

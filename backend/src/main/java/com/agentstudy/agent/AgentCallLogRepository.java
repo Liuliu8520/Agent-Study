@@ -10,4 +10,6 @@ public interface AgentCallLogRepository {
     Optional<AgentCallLog> findById(String callId);
 
     List<AgentCallLog> findLatest(int limit);
+
+    List<AgentCallLog> search(AgentCallLogQuery query);
 }

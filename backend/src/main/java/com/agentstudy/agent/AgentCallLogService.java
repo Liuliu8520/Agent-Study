@@ -55,6 +55,17 @@ public class AgentCallLogService {
         return repository.findLatest(safeLimit);
     }
 
+    public List<AgentCallLog> search(
+            int limit,
+            String sessionId,
+            AgentType agentType,
+            AgentCallStatus status,
+            String promptCode
+    ) {
+        int safeLimit = Math.min(Math.max(limit, 1), 100);
+        return repository.search(new AgentCallLogQuery(safeLimit, sessionId, agentType, status, promptCode));
+    }
+
     public AgentCallLog getRequired(String callId) {
         return repository.findById(callId)
                 .orElseThrow(() -> BusinessException.notFound("Agent call log not found: " + callId));

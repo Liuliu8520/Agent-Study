@@ -1,6 +1,7 @@
 package com.agentstudy.agent.persistence;
 
 import com.agentstudy.agent.AgentCallLog;
+import com.agentstudy.agent.AgentCallLogQuery;
 import com.agentstudy.agent.AgentCallLogRepository;
 import com.agentstudy.agent.AgentCallStatus;
 import com.agentstudy.agent.AgentType;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 @Profile("dev")
@@ -107,11 +109,38 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
 
     @Override
     public List<AgentCallLog> findLatest(int limit) {
+        return search(new AgentCallLogQuery(limit, null, null, null, null));
+    }
+
+    @Override
+    public List<AgentCallLog> search(AgentCallLogQuery query) {
+        List<String> parameters = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM agent_call_log WHERE 1 = 1");
+
+        if (StringUtils.hasText(query.sessionId())) {
+            sql.append(" AND session_id = ?");
+            parameters.add(query.sessionId().trim());
+        }
+        if (query.agentType() != null) {
+            sql.append(" AND agent_type = ?");
+            parameters.add(query.agentType().name());
+        }
+        if (query.status() != null) {
+            sql.append(" AND status = ?");
+            parameters.add(query.status().name());
+        }
+        if (StringUtils.hasText(query.promptCode())) {
+            sql.append(" AND prompt_code = ?");
+            parameters.add(query.promptCode().trim());
+        }
+        sql.append(" ORDER BY created_at DESC LIMIT ?");
+
         try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT * FROM agent_call_log ORDER BY created_at DESC LIMIT ?"
-             )) {
-            statement.setInt(1, limit);
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int index = 0; index < parameters.size(); index++) {
+                statement.setString(index + 1, parameters.get(index));
+            }
+            statement.setInt(parameters.size() + 1, query.limit());
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<AgentCallLog> logs = new ArrayList<>();
                 while (resultSet.next()) {
@@ -120,7 +149,7 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
                 return logs;
             }
         } catch (SQLException exception) {
-            throw new IllegalStateException("Failed to list agent call logs", exception);
+            throw new IllegalStateException("Failed to search agent call logs", exception);
         }
     }
 

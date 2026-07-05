@@ -117,6 +117,42 @@ class AgentControllerTests {
     }
 
     @Test
+    void filtersAgentCallLogs() {
+        ResponseEntity<JsonNode> response = restTemplate.postForEntity(
+                "/api/agent/mock-chat",
+                Map.of(
+                        "sessionId", "session-filtered-log",
+                        "promptCode", "lesson.micro",
+                        "variables", Map.of(
+                                "learningPlan", "filtered plan",
+                                "weakPoints", "chain rule",
+                                "retrievedChunks", "chunk"
+                        )
+                ),
+                JsonNode.class
+        );
+        String callId = response.getBody().path("data").path("callId").asText();
+
+        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+                "/api/agent/call-logs?sessionId={sessionId}&agentType={agentType}&status={status}&promptCode={promptCode}&limit=5",
+                JsonNode.class,
+                "session-filtered-log",
+                "LESSON_GENERATOR",
+                "SUCCESS",
+                "lesson.micro"
+        );
+
+        assertThat(logResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode data = logResponse.getBody().path("data");
+        assertThat(data.size()).isEqualTo(1);
+        assertThat(data.get(0).path("callId").asText()).isEqualTo(callId);
+        assertThat(data.get(0).path("sessionId").asText()).isEqualTo("session-filtered-log");
+        assertThat(data.get(0).path("agentType").asText()).isEqualTo("LESSON_GENERATOR");
+        assertThat(data.get(0).path("status").asText()).isEqualTo("SUCCESS");
+        assertThat(data.get(0).path("promptCode").asText()).isEqualTo("lesson.micro");
+    }
+
+    @Test
     void returnsNotFoundForUnknownPromptTemplate() {
         ResponseEntity<JsonNode> response = restTemplate.postForEntity(
                 "/api/agent/mock-chat",

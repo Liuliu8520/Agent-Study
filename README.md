@@ -32,6 +32,7 @@ Agent_Study/
 - `prompt_template` 支撑 Prompt 模板持久化和在线更新
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
+- Agent 调用日志支持按会话、Agent 类型、状态和 Prompt 编码筛选
 - `knowledge_chunk` 支撑 RAG 知识切片持久化和关键词召回
 - `statistics` 模块提供学习会话、薄弱点和 Agent 调用统计
 - Step 1 诊断结果分析已接入 `diagnosis.default` Agent 调用日志

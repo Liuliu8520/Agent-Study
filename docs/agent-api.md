@@ -82,7 +82,19 @@ Content-Type: application/json
 GET /api/agent/call-logs?limit=20
 ```
 
-默认最多返回 20 条，服务端会把 `limit` 限制在 1 到 100 之间。
+支持筛选：
+
+```http
+GET /api/agent/call-logs?sessionId=session-id&agentType=LESSON_GENERATOR&status=SUCCESS&promptCode=lesson.micro&limit=20
+```
+
+可选参数：
+
+- `sessionId`: 学习会话 ID。
+- `agentType`: Agent 类型，例如 `DIAGNOSTICIAN`、`LESSON_GENERATOR`。
+- `status`: 调用状态，`SUCCESS` 或 `FAILED`。
+- `promptCode`: Prompt 模板编码。
+- `limit`: 返回条数，默认 20，服务端限制在 1 到 100。
 
 ## 查询单条 Agent 调用日志
 

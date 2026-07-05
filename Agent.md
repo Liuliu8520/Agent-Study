@@ -62,6 +62,7 @@ Implemented:
 - `MockLlmClient` for deterministic local Agent calls without an API key.
 - `AgentCallLog` with default in-memory storage and dev MySQL storage.
 - Agent debug APIs under `/api/agent`.
+- Agent call logs can be filtered by `sessionId`, `agentType`, `status`, and `promptCode`.
 - `knowledge_chunk` repository abstraction with default in-memory storage and dev MySQL storage.
 - RAG debug APIs under `/api/rag`.
 - Statistics dashboard API under `/api/statistics/dashboard`.
