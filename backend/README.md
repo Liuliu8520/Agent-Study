@@ -17,6 +17,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `POST /api/learn/sessions/{sessionId}/exercises/submit` Step 4 表达式自动判卷
 - `POST /api/learn/sessions/{sessionId}/review` Step 5 生成智能复习或结业结果
 - `GET /api/agent/prompts` 查询默认 Prompt 模板
+- `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板
 - `POST /api/agent/mock-chat` 调用 Mock LLM Client
 - `GET /api/agent/call-logs` 查询 Agent 调用日志
 - `GET /api/rag/chunks` 查询 RAG 知识切片
@@ -27,6 +28,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - 默认 profile 使用 `InMemoryLearningSessionRepository`，方便本地测试和快速启动。
 - `dev` profile 使用 `MySqlRedisLearningSessionRepository`，MySQL 保存 `LearningState` 快照，Redis 缓存热点会话。
 - `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
+- `dev` profile 使用 MySQL 保存 `prompt_template`，默认 profile 使用内存 Prompt 模板仓库。
 - `dev` profile 使用 MySQL 保存 `knowledge_chunk`，表为空时自动写入默认高数切片。
 - Step 1 诊断结果分析会调用 `diagnosis.default` Mock Agent，并写入 Agent 调用日志。
 - Step 2 学习计划生成会调用 `planner.three-day` Mock Agent，并写入 Agent 调用日志。

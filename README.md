@@ -28,6 +28,7 @@ Agent_Study/
 - MySQL 持久化 `LearningState` 快照
 - Redis 缓存热点学习会话
 - `PromptService` 内置 5 类 Agent Prompt 模板
+- `prompt_template` 支撑 Prompt 模板持久化和在线更新
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
 - `knowledge_chunk` 支撑 RAG 知识切片持久化和关键词召回

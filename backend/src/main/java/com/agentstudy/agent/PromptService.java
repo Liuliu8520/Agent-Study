@@ -13,22 +13,24 @@ public class PromptService {
 
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_.-]+)\\s*}}");
 
-    private final Map<String, PromptTemplate> templates;
+    private final PromptTemplateRepository repository;
 
-    public PromptService() {
-        this.templates = loadDefaultTemplates();
+    public PromptService(PromptTemplateRepository repository) {
+        this.repository = repository;
+        initializeDefaultTemplates();
     }
 
     public List<PromptTemplate> listTemplates() {
-        return List.copyOf(templates.values());
+        return repository.findAll();
     }
 
     public PromptTemplate getTemplate(String code) {
-        PromptTemplate template = templates.get(code);
-        if (template == null) {
-            throw BusinessException.notFound("Prompt template not found: " + code);
-        }
-        return template;
+        return repository.findByCode(code)
+                .orElseThrow(() -> BusinessException.notFound("Prompt template not found: " + code));
+    }
+
+    public PromptTemplate saveTemplate(PromptTemplate template) {
+        return repository.save(template);
     }
 
     public RenderedPrompt render(String code, Map<String, Object> variables) {
@@ -53,6 +55,14 @@ public class PromptService {
         }
         matcher.appendTail(result);
         return result.toString();
+    }
+
+    private void initializeDefaultTemplates() {
+        loadDefaultTemplates().values().forEach(template -> {
+            if (repository.findByCode(template.code()).isEmpty()) {
+                repository.save(template);
+            }
+        });
     }
 
     private Map<String, PromptTemplate> loadDefaultTemplates() {
@@ -118,7 +128,7 @@ public class PromptService {
                         请输出复习建议，错误率较高时额外生成 2 道变式题。
                         """
         ));
-        return Map.copyOf(defaults);
+        return defaults;
     }
 
     private void add(Map<String, PromptTemplate> templates, PromptTemplate template) {

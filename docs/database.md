@@ -1,9 +1,10 @@
 # 数据库设计
 
-当前阶段已经落地两类核心数据：
+当前阶段已经落地四类核心数据：
 
 - 学习会话状态快照：支撑学生端 5 步学习闭环的恢复和查询。
 - Agent 调用日志：支撑 Prompt、模型输入输出、耗时和失败原因追踪。
+- Prompt 模板：支撑 Agent Prompt 的持久化和在线更新。
 - RAG 知识切片：支撑微讲义生成前的关键词召回。
 
 ## learning_session
@@ -49,6 +50,25 @@
 - `idx_agent_call_log_session_created`: 按学习会话查看 Agent 调用链路。
 - `idx_agent_call_log_agent_created`: 按 Agent 类型统计调用情况。
 
+## prompt_template
+
+用途：保存 Agent Prompt 模板，支持通过 API 新增和更新。
+
+字段：
+
+- `code`: Prompt 模板编码，主键，例如 `diagnosis.default`。
+- `agent_type`: Agent 类型。
+- `version`: 模板版本。
+- `name`: 模板展示名。
+- `system_prompt`: system prompt。
+- `user_prompt_template`: 带变量占位符的 user prompt。
+- `created_at`: 创建时间。
+- `updated_at`: 更新时间。
+
+索引：
+
+- `idx_prompt_template_agent_type`: 按 Agent 类型筛选 Prompt 模板。
+
 ## knowledge_chunk
 
 用途：保存高数知识库切片，供 RAG 检索使用。
@@ -77,7 +97,7 @@ DDL 文件：
 backend/src/main/resources/db/schema-mysql.sql
 ```
 
-`dev` profile 下后端启动时会自动执行同等建表语句。
+`dev` profile 下后端启动时会自动执行建表语句。
 
 ## Redis 缓存
 
@@ -91,11 +111,10 @@ agent-study:learning-session:{sessionId}
 
 Value：`LearningState` JSON 快照。
 
-默认 TTL：120 分钟，可通过 `agent-study.persistence.cache-ttl-minutes` 配置。
+默认 TTL：20 分钟，可通过 `agent-study.persistence.cache-ttl-minutes` 配置。
 
 ## 后续规划表
 
 - `exercise_attempt`: 单次练习提交记录和判卷明细。
-- `prompt_template`: Agent Prompt 模板。
 - `admin_user`: 管理员账号。
 - `operation_log`: 后台操作审计。

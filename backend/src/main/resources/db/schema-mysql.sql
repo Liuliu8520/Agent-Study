@@ -27,6 +27,18 @@ CREATE TABLE IF NOT EXISTS agent_call_log (
     KEY idx_agent_call_log_agent_created (agent_type, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS prompt_template (
+    code VARCHAR(100) NOT NULL PRIMARY KEY COMMENT 'prompt template code',
+    agent_type VARCHAR(50) NOT NULL COMMENT 'agent type',
+    version VARCHAR(20) NOT NULL COMMENT 'prompt version',
+    name VARCHAR(100) NOT NULL COMMENT 'template display name',
+    system_prompt TEXT NOT NULL COMMENT 'system prompt',
+    user_prompt_template MEDIUMTEXT NOT NULL COMMENT 'user prompt template',
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'created time',
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT 'updated time',
+    KEY idx_prompt_template_agent_type (agent_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS knowledge_chunk (
     chunk_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'knowledge chunk id',
     chapter VARCHAR(100) NOT NULL COMMENT 'chapter name',

@@ -56,6 +56,7 @@ Implemented:
 - MySQL `learning_session` table auto initialization.
 - Redis cache key: `agent-study:learning-session:{sessionId}`.
 - `PromptService` with 5 default Agent prompt templates.
+- Prompt templates can be stored in MySQL through `prompt_template` and updated through `/api/agent/prompts/{code}`.
 - `MockLlmClient` for deterministic local Agent calls without an API key.
 - `AgentCallLog` with default in-memory storage and dev MySQL storage.
 - Agent debug APIs under `/api/agent`.
@@ -101,7 +102,7 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 - Do not commit real API keys, JWT secrets, database passwords, or LLM credentials.
 - Do not commit local caches, downloaded tools, build outputs, or IDE metadata.
 - Use Chinese commit messages from this point forward.
-- Agent prompts should eventually be stored in MySQL and managed by `PromptService`.
+- Keep prompt template management small and API-first before adding a visual admin console.
 - Agent input/output should use DTOs instead of raw maps.
 - LLM calls should eventually be logged through `agent_call_log`.
 

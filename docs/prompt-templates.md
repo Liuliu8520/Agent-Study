@@ -1,6 +1,11 @@
 # Prompt 模板
 
-当前版本先在 `PromptService` 中内置 5 个默认 Prompt 模板，后续再迁移到 MySQL 的 `prompt_template` 表，并通过后台页面管理版本。
+当前后端通过 `PromptService` 管理 Agent Prompt 模板：
+
+- 默认 profile 使用内存 `PromptTemplateRepository`。
+- `dev` profile 使用 MySQL `prompt_template` 表。
+- 启动时会自动补齐 5 个默认模板。
+- 可以通过 `PUT /api/agent/prompts/{code}` 新增或更新模板。
 
 ## 模板列表
 
@@ -22,7 +27,7 @@ Prompt 模板使用双花括号变量：
 {{retrievedChunks}}
 ```
 
-`PromptService` 会用请求中的 `variables` 字段进行替换。缺失变量会保留原占位符，方便调试 Prompt 是否缺参。
+`PromptService` 会用请求中的 `variables` 字段替换变量。缺失变量会保留原占位符，方便调试 Prompt 是否缺参。
 
 ## Mock LLM
 
@@ -35,4 +40,4 @@ Prompt 模板使用双花括号变量：
 - 输出文本
 - 调用耗时
 
-这样可以先把 Agent 工程链路跑通，后续替换真实 LLM Client 时不用改业务入口。
+这样可以先跑通 Agent 工程链路，后续替换真实 LLM Client 时不用改业务入口。

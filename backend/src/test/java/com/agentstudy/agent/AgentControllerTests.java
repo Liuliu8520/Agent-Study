@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -26,8 +28,55 @@ class AgentControllerTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode data = response.getBody().path("data");
-        assertThat(data.size()).isEqualTo(5);
+        assertThat(data.size()).isGreaterThanOrEqualTo(5);
         assertThat(data.toString()).contains("lesson.micro");
+    }
+
+    @Test
+    void upsertsPromptTemplateAndUsesItInMockRun() {
+        ResponseEntity<JsonNode> upsertResponse = restTemplate.exchange(
+                "/api/agent/prompts/{code}",
+                HttpMethod.PUT,
+                new HttpEntity<>(Map.of(
+                        "agentType", "LESSON_GENERATOR",
+                        "version", "v2",
+                        "name", "Custom Lesson Agent",
+                        "systemPrompt", "Custom lesson system prompt",
+                        "userPromptTemplate", "Custom lesson for {{topic}}"
+                )),
+                JsonNode.class,
+                "custom.lesson"
+        );
+
+        assertThat(upsertResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode template = upsertResponse.getBody().path("data");
+        assertThat(template.path("code").asText()).isEqualTo("custom.lesson");
+        assertThat(template.path("version").asText()).isEqualTo("v2");
+
+        ResponseEntity<JsonNode> runResponse = restTemplate.postForEntity(
+                "/api/agent/mock-chat",
+                Map.of(
+                        "sessionId", "session-custom-prompt",
+                        "promptCode", "custom.lesson",
+                        "variables", Map.of("topic", "chain rule")
+                ),
+                JsonNode.class
+        );
+
+        assertThat(runResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode run = runResponse.getBody().path("data");
+        assertThat(run.path("promptVersion").asText()).isEqualTo("v2");
+        String callId = run.path("callId").asText();
+
+        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+                "/api/agent/call-logs/{callId}",
+                JsonNode.class,
+                callId
+        );
+        JsonNode log = logResponse.getBody().path("data");
+        assertThat(log.path("promptVersion").asText()).isEqualTo("v2");
+        assertThat(log.path("requestPayload").asText()).contains("Custom lesson system prompt");
+        assertThat(log.path("requestPayload").asText()).contains("Custom lesson for chain rule");
     }
 
     @Test

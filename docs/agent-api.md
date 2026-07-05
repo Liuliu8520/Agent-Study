@@ -12,7 +12,28 @@
 GET /api/agent/prompts
 ```
 
-返回当前内置的 5 个 Prompt 模板。
+返回当前可用的 Prompt 模板。默认会初始化 5 个内置模板，后续通过接口新增的模板也会出现在列表中。
+
+## 新增或更新 Prompt 模板
+
+```http
+PUT /api/agent/prompts/{code}
+Content-Type: application/json
+```
+
+请求体：
+
+```json
+{
+  "agentType": "LESSON_GENERATOR",
+  "version": "v2",
+  "name": "Custom Lesson Agent",
+  "systemPrompt": "你是高数微讲义生成 Agent。",
+  "userPromptTemplate": "请围绕 {{topic}} 生成一段讲义。"
+}
+```
+
+`code` 由路径提供，同一个 code 再次提交会覆盖对应模板。模板变量使用 `{{variableName}}` 语法。
 
 ## 调用 Mock Agent
 
