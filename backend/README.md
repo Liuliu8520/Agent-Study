@@ -23,7 +23,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `GET /api/learn/sessions/{sessionId}/exercise-attempts` 查询练习提交记录
 - `POST /api/learn/sessions/{sessionId}/review` Step 5 生成智能复习或结业结果
 - `GET /api/agent/prompts` 查询默认 Prompt 模板
-- `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板
+- `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板，需要后台管理员 Bearer Token
 - `POST /api/agent/mock-chat` 调用 Mock LLM Client
 - `GET /api/agent/call-logs` 查询 Agent 调用日志，支持 `sessionId`、`agentType`、`status`、`promptCode`、`limit`
 - `GET /api/rag/chunks` 查询 RAG 知识切片

@@ -32,7 +32,7 @@ Agent_Study/
 - MySQL 持久化 `LearningState` 快照
 - Redis 缓存热点学习会话
 - `PromptService` 内置 5 类 Agent Prompt 模板
-- `prompt_template` 支撑 Prompt 模板持久化和在线更新
+- `prompt_template` 支撑 Prompt 模板持久化和在线更新，写接口已接入后台 JWT 鉴权
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
 - 可配置 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时

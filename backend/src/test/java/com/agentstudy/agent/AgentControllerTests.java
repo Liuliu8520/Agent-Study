@@ -4,20 +4,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AgentControllerTests {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @BeforeEach
+    void setUpRestTemplate() {
+        restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+    }
 
     @Test
     void listsDefaultPromptTemplates() {
@@ -33,17 +41,25 @@ class AgentControllerTests {
     }
 
     @Test
+    void rejectsPromptTemplateUpsertWithoutAdminToken() {
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                "/api/agent/prompts/{code}",
+                HttpMethod.PUT,
+                new HttpEntity<>(promptTemplateBody()),
+                JsonNode.class,
+                "custom.lesson"
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody().path("message").asText()).contains("Admin authentication is required");
+    }
+
+    @Test
     void upsertsPromptTemplateAndUsesItInMockRun() {
         ResponseEntity<JsonNode> upsertResponse = restTemplate.exchange(
                 "/api/agent/prompts/{code}",
                 HttpMethod.PUT,
-                new HttpEntity<>(Map.of(
-                        "agentType", "LESSON_GENERATOR",
-                        "version", "v2",
-                        "name", "Custom Lesson Agent",
-                        "systemPrompt", "Custom lesson system prompt",
-                        "userPromptTemplate", "Custom lesson for {{topic}}"
-                )),
+                new HttpEntity<>(promptTemplateBody(), adminHeaders()),
                 JsonNode.class,
                 "custom.lesson"
         );
@@ -162,5 +178,30 @@ class AgentControllerTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody().path("message").asText()).contains("Prompt template not found");
+    }
+
+    private Map<String, String> promptTemplateBody() {
+        return Map.of(
+                "agentType", "LESSON_GENERATOR",
+                "version", "v2",
+                "name", "Custom Lesson Agent",
+                "systemPrompt", "Custom lesson system prompt",
+                "userPromptTemplate", "Custom lesson for {{topic}}"
+        );
+    }
+
+    private HttpHeaders adminHeaders() {
+        ResponseEntity<JsonNode> loginResponse = restTemplate.postForEntity(
+                "/api/admin/auth/login",
+                Map.of("username", "admin", "password", "agentstudy"),
+                JsonNode.class
+        );
+
+        assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String token = loginResponse.getBody().path("data").path("accessToken").asText();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 }

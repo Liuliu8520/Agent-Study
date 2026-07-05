@@ -62,7 +62,7 @@ Implemented:
 - MySQL `exercise_attempt` table auto initialization.
 - Redis cache key: `agent-study:learning-session:{sessionId}`.
 - `PromptService` with 5 default Agent prompt templates.
-- Prompt templates can be stored in MySQL through `prompt_template` and updated through `/api/agent/prompts/{code}`.
+- Prompt templates can be stored in MySQL through `prompt_template` and updated through JWT-protected `PUT /api/agent/prompts/{code}`.
 - `MockLlmClient` for deterministic local Agent calls without an API key.
 - OpenAI-compatible real LLM client can be enabled by configuration while keeping Mock fallback.
 - `AgentCallLog` with default in-memory storage and dev MySQL storage.
@@ -113,7 +113,7 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 - Use Chinese commit messages from this point forward.
 - Keep prompt template management small and API-first before adding a visual admin console.
 - Agent input/output should use DTOs instead of raw maps.
-- LLM calls should eventually be logged through `agent_call_log`.
+- Agent management write APIs should stay behind JWT protection.
 
 ## Git Notes
 
@@ -132,8 +132,8 @@ Recommended commit style:
 
 ## Next Milestone
 
-- Replace keyword retrieval with embedding/vector search.
-- Move prompt templates from memory to a `prompt_template` table.
-- Replace deterministic planner logic with `PlannerAgent`.
-- Evolve `DiagnosisAgentService` from logging/analyzing diagnosis results to structured diagnosis report generation.
-- Add `agent_call_log` for LLM call observability.
+- Replace keyword RAG retrieval with embedding/vector search.
+- Add a small admin UI or API workflow for viewing Prompt templates and Agent call logs.
+- Evolve diagnosis output from weak point extraction to a structured diagnosis report.
+- Add frontend student learning flow pages.
+- Add deployment/demo polish: Dockerized backend profile, environment templates, and demo script.

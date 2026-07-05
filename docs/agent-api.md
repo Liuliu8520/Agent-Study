@@ -19,6 +19,7 @@ GET /api/agent/prompts
 ```http
 PUT /api/agent/prompts/{code}
 Content-Type: application/json
+Authorization: Bearer jwt-token
 ```
 
 请求体：
@@ -34,6 +35,8 @@ Content-Type: application/json
 ```
 
 `code` 由路径提供，同一个 code 再次提交会覆盖对应模板。模板变量使用 `{{variableName}}` 语法。
+
+该接口属于后台管理操作，需要先通过 `POST /api/admin/auth/login` 获取管理员 Bearer Token。
 
 ## 调用 Mock Agent
 

@@ -139,7 +139,7 @@ POST /api/learn/sessions/{sessionId}/review
 
 ```http
 GET /api/agent/prompts
-PUT /api/agent/prompts/{code}
+PUT /api/agent/prompts/{code}  # 需要管理员 Bearer Token
 POST /api/agent/mock-chat
 GET /api/agent/call-logs?limit=20
 GET /api/agent/call-logs/{callId}

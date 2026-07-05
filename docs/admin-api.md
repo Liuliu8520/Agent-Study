@@ -8,6 +8,10 @@
 
 除登录接口外，`/api/admin/**` 都需要 Bearer Token。
 
+当前接入后台权限的管理操作：
+
+- `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板。
+
 ## 管理员登录
 
 ```http
