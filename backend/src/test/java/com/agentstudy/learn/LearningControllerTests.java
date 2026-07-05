@@ -289,6 +289,13 @@ class LearningControllerTests {
         assertThat(data.path("nextAction").asText()).isEqualTo("submitExercises");
         assertThat(data.path("questions").size()).isEqualTo(3);
         assertThat(data.path("questions").get(0).has("standardAnswer")).isFalse();
+
+        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+                "/api/agent/call-logs?limit=10",
+                JsonNode.class
+        );
+        assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
+        assertThat(logResponse.getBody().path("data").toString()).contains("exercise.generate");
     }
 
     @Test

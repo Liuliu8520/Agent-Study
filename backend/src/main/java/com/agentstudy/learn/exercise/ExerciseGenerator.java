@@ -7,7 +7,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExerciseGenerator {
 
-    public List<ExerciseQuestion> generate(List<WeakPoint> weakPoints, String lessonMarkdown) {
+    private final ExerciseAgentService exerciseAgentService;
+
+    public ExerciseGenerator(ExerciseAgentService exerciseAgentService) {
+        this.exerciseAgentService = exerciseAgentService;
+    }
+
+    public List<ExerciseQuestion> generate(String sessionId, List<WeakPoint> weakPoints, String lessonMarkdown) {
+        exerciseAgentService.generateDraft(sessionId, weakPoints == null ? List.of() : weakPoints, lessonMarkdown);
         return List.of(
                 new ExerciseQuestion(
                         "exercise-power-derivative",
@@ -30,4 +37,3 @@ public class ExerciseGenerator {
         );
     }
 }
-

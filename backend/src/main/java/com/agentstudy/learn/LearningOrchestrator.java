@@ -181,7 +181,11 @@ public class LearningOrchestrator {
             throw BusinessException.badRequest("Micro lesson has not been generated");
         }
 
-        List<ExerciseQuestion> exercises = exerciseGenerator.generate(state.getWeakPoints(), state.getGeneratedLesson());
+        List<ExerciseQuestion> exercises = exerciseGenerator.generate(
+                state.getSessionId(),
+                state.getWeakPoints(),
+                state.getGeneratedLesson()
+        );
         state.setExercises(exercises);
         repository.save(state);
 
