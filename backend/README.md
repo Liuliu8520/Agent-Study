@@ -16,11 +16,15 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `POST /api/learn/sessions/{sessionId}/exercises` Step 4 生成练习题
 - `POST /api/learn/sessions/{sessionId}/exercises/submit` Step 4 表达式自动判卷
 - `POST /api/learn/sessions/{sessionId}/review` Step 5 生成智能复习或结业结果
+- `GET /api/agent/prompts` 查询默认 Prompt 模板
+- `POST /api/agent/mock-chat` 调用 Mock LLM Client
+- `GET /api/agent/call-logs` 查询 Agent 调用日志
 
 持久化状态：
 
 - 默认 profile 使用 `InMemoryLearningSessionRepository`，方便本地测试和快速启动。
 - `dev` profile 使用 `MySqlRedisLearningSessionRepository`，MySQL 保存 `LearningState` 快照，Redis 缓存热点会话。
+- `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
 - MySQL 表结构见 `src/main/resources/db/schema-mysql.sql`，dev 仓库启动时会自动建表。
 
 ## 运行测试

@@ -1,6 +1,9 @@
 # 数据库设计
 
-当前阶段先完成学习会话持久化，后续再拆分更细的练习记录、Agent 调用日志、知识库切片和 Prompt 管理表。
+当前阶段已经落地两类核心数据：
+
+- 学习会话状态快照：支撑学生端 5 步学习闭环的恢复和查询。
+- Agent 调用日志：支撑 Prompt、模型输入输出、耗时和失败原因追踪。
 
 ## learning_session
 
@@ -20,6 +23,30 @@
 
 - `idx_learning_session_student`: 按学生名查询会话。
 - `idx_learning_session_status_updated`: 按状态和更新时间筛选会话。
+
+## agent_call_log
+
+用途：记录一次 Agent/LLM 调用，方便调试 Prompt、排查输出和统计耗时。
+
+字段：
+
+- `call_id`: 调用 ID，主键。
+- `session_id`: 关联学习会话 ID，可为空。
+- `agent_type`: Agent 类型，例如 `LESSON_GENERATOR`。
+- `prompt_code`: Prompt 模板编码，例如 `lesson.micro`。
+- `prompt_version`: Prompt 模板版本。
+- `model_name`: 模型名称，当前 Mock 实现为 `mock-llm-v1`。
+- `request_payload`: 渲染后的 system/user prompt。
+- `response_text`: LLM 输出文本。
+- `status`: 调用状态，`SUCCESS` 或 `FAILED`。
+- `error_message`: 失败原因。
+- `duration_millis`: 调用耗时。
+- `created_at`: 创建时间。
+
+索引：
+
+- `idx_agent_call_log_session_created`: 按学习会话查看 Agent 调用链路。
+- `idx_agent_call_log_agent_created`: 按 Agent 类型统计调用情况。
 
 DDL 文件：
 
@@ -48,6 +75,5 @@ Value：`LearningState` JSON 快照。
 - `exercise_attempt`: 单次练习提交记录和判卷明细。
 - `knowledge_chunk`: RAG 知识切片。
 - `prompt_template`: Agent Prompt 模板。
-- `agent_call_log`: LLM/Agent 调用日志。
 - `admin_user`: 管理员账号。
 - `operation_log`: 后台操作审计。

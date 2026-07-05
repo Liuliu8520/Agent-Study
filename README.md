@@ -27,6 +27,9 @@ Agent_Study/
 - Step 5 智能复习或结业结果生成
 - MySQL 持久化 `LearningState` 快照
 - Redis 缓存热点学习会话
+- `PromptService` 内置 5 类 Agent Prompt 模板
+- `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
+- `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
 
 ## 后端运行
 
