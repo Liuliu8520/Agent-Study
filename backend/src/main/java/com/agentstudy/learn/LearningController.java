@@ -13,11 +13,13 @@ import com.agentstudy.learn.dto.ReviewResponse;
 import com.agentstudy.learn.dto.SubmitExerciseRequest;
 import com.agentstudy.learn.dto.SubmitDiagnosisRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,6 +37,15 @@ public class LearningController {
             @Valid @RequestBody(required = false) CreateLearningSessionRequest request
     ) {
         return ApiResponse.success(learningService.createSession(request));
+    }
+
+    @GetMapping
+    public ApiResponse<List<LearningSessionResponse>> listSessions(
+            @RequestParam(required = false) String studentName,
+            @RequestParam(required = false) LearningSessionStatus status,
+            @RequestParam(defaultValue = "20") int limit
+    ) {
+        return ApiResponse.success(learningService.listSessions(studentName, status, limit));
     }
 
     @GetMapping("/{sessionId}")

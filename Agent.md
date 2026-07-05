@@ -44,6 +44,7 @@ Implemented:
 - Spring Boot application entry.
 - `GET /api/health` health check.
 - `POST /api/learn/sessions` create learning session.
+- `GET /api/learn/sessions` list learning sessions with optional `studentName`, `status`, and `limit` filters.
 - `GET /api/learn/sessions/{sessionId}` get learning session.
 - `POST /api/learn/sessions/{sessionId}/diagnosis/questions` generate Step 1 diagnosis questions.
 - `POST /api/learn/sessions/{sessionId}/diagnosis/submit` submit Step 1 diagnosis answers.

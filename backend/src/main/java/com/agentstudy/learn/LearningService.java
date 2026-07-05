@@ -11,6 +11,7 @@ import com.agentstudy.learn.dto.MicroLessonResponse;
 import com.agentstudy.learn.dto.ReviewResponse;
 import com.agentstudy.learn.dto.SubmitExerciseRequest;
 import com.agentstudy.learn.dto.SubmitDiagnosisRequest;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,6 +33,10 @@ public class LearningService {
 
     public LearningSessionResponse getSession(String sessionId) {
         return learningOrchestrator.getSession(sessionId);
+    }
+
+    public List<LearningSessionResponse> listSessions(String studentName, LearningSessionStatus status, int limit) {
+        return learningOrchestrator.listSessions(studentName, status, normalizeLimit(limit));
     }
 
     public DiagnosisQuestionSetResponse generateDiagnosisQuestions(String sessionId) {
@@ -67,5 +72,9 @@ public class LearningService {
             return DEFAULT_STUDENT_NAME;
         }
         return request.studentName().trim();
+    }
+
+    private int normalizeLimit(int limit) {
+        return Math.min(Math.max(limit, 1), 100);
     }
 }

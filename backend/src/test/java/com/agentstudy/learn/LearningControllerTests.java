@@ -62,6 +62,34 @@ class LearningControllerTests {
     }
 
     @Test
+    void listsLearningSessionsWithFiltersAndLimit() {
+        String inProgressSessionId = createSession("SessionListA");
+        createSession("SessionListB");
+        generateDiagnosisQuestions(inProgressSessionId);
+
+        ResponseEntity<JsonNode> filteredResponse = restTemplate.getForEntity(
+                "/api/learn/sessions?studentName={studentName}&status={status}&limit=10",
+                JsonNode.class,
+                "SessionListA",
+                "IN_PROGRESS"
+        );
+
+        assertThat(filteredResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode filteredData = filteredResponse.getBody().path("data");
+        assertThat(filteredData.size()).isEqualTo(1);
+        assertThat(filteredData.get(0).path("sessionId").asText()).isEqualTo(inProgressSessionId);
+        assertThat(filteredData.get(0).path("studentName").asText()).isEqualTo("SessionListA");
+        assertThat(filteredData.get(0).path("status").asText()).isEqualTo("IN_PROGRESS");
+
+        ResponseEntity<JsonNode> limitedResponse = restTemplate.getForEntity(
+                "/api/learn/sessions?limit=1",
+                JsonNode.class
+        );
+        assertThat(limitedResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(limitedResponse.getBody().path("data").size()).isEqualTo(1);
+    }
+
+    @Test
     void defaultsStudentNameWhenStudentNameIsMissing() {
         ResponseEntity<JsonNode> response = restTemplate.postForEntity(
                 "/api/learn/sessions",

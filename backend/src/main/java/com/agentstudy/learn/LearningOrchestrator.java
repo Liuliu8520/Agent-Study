@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class LearningOrchestrator {
@@ -82,6 +83,15 @@ public class LearningOrchestrator {
 
     public LearningSessionResponse getSession(String sessionId) {
         return LearningSessionResponse.from(getRequiredState(sessionId));
+    }
+
+    public List<LearningSessionResponse> listSessions(String studentName, LearningSessionStatus status, int limit) {
+        return repository.findAll().stream()
+                .filter(state -> matchesStudentName(state, studentName))
+                .filter(state -> status == null || state.getStatus() == status)
+                .limit(limit)
+                .map(LearningSessionResponse::from)
+                .toList();
     }
 
     public DiagnosisQuestionSetResponse generateDiagnosisQuestions(String sessionId) {
@@ -286,6 +296,13 @@ public class LearningOrchestrator {
         if (state.getCurrentStep() != expectedStep) {
             throw BusinessException.badRequest(message);
         }
+    }
+
+    private boolean matchesStudentName(LearningState state, String studentName) {
+        if (!StringUtils.hasText(studentName)) {
+            return true;
+        }
+        return state.getStudentName().equalsIgnoreCase(studentName.trim());
     }
 
     private Map<String, String> toSubmittedAnswerMap(SubmitDiagnosisRequest request) {

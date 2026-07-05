@@ -8,6 +8,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 
 - `GET /api/health` 健康检查
 - `POST /api/learn/sessions` 创建学习会话
+- `GET /api/learn/sessions` 查询学习会话列表，支持 `studentName`、`status`、`limit`
 - `GET /api/learn/sessions/{sessionId}` 查询学习会话
 - `POST /api/learn/sessions/{sessionId}/diagnosis/questions` Step 1 生成诊断题
 - `POST /api/learn/sessions/{sessionId}/diagnosis/submit` Step 1 提交诊断答案
