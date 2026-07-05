@@ -8,7 +8,9 @@ public record KnowledgeChunkResponse(
         String chapter,
         String title,
         String content,
-        List<String> tags
+        List<String> tags,
+        boolean embeddingReady,
+        int embeddingDimensions
 ) {
 
     public static KnowledgeChunkResponse from(KnowledgeChunk chunk) {
@@ -17,7 +19,9 @@ public record KnowledgeChunkResponse(
                 chunk.chapter(),
                 chunk.title(),
                 chunk.content(),
-                chunk.tags()
+                chunk.tags(),
+                chunk.hasEmbedding(),
+                chunk.embedding().size()
         );
     }
 }

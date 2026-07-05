@@ -39,6 +39,21 @@ CREATE TABLE IF NOT EXISTS prompt_template (
     KEY idx_prompt_template_agent_type (agent_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS prompt_template_version (
+    version_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'prompt version id',
+    code VARCHAR(100) NOT NULL COMMENT 'prompt template code',
+    agent_type VARCHAR(50) NOT NULL COMMENT 'agent type',
+    version_label VARCHAR(20) NOT NULL COMMENT 'business version label',
+    name VARCHAR(100) NOT NULL COMMENT 'template display name',
+    system_prompt TEXT NOT NULL COMMENT 'system prompt',
+    user_prompt_template MEDIUMTEXT NOT NULL COMMENT 'user prompt template',
+    active TINYINT NOT NULL DEFAULT 0 COMMENT 'whether this version is active',
+    created_by VARCHAR(100) NOT NULL COMMENT 'operator username',
+    created_at DATETIME(6) NOT NULL COMMENT 'created time',
+    KEY idx_prompt_template_version_code_created (code, created_at),
+    KEY idx_prompt_template_version_code_active (code, active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS exercise_attempt (
     attempt_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'exercise attempt id',
     session_id VARCHAR(64) NOT NULL COMMENT 'learning session id',
@@ -56,9 +71,23 @@ CREATE TABLE IF NOT EXISTS knowledge_chunk (
     title VARCHAR(200) NOT NULL COMMENT 'chunk title',
     content TEXT NOT NULL COMMENT 'chunk content',
     tags_json JSON NOT NULL COMMENT 'retrieval tags',
+    embedding_json JSON NULL COMMENT 'embedding vector',
     enabled TINYINT NOT NULL DEFAULT 1 COMMENT 'whether chunk is enabled',
     created_at DATETIME(6) NOT NULL COMMENT 'created time',
     updated_at DATETIME(6) NOT NULL COMMENT 'updated time',
     KEY idx_knowledge_chunk_chapter (chapter),
     KEY idx_knowledge_chunk_enabled_updated (enabled, updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS operation_log (
+    log_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'operation log id',
+    operator VARCHAR(100) NOT NULL COMMENT 'operator username',
+    action VARCHAR(100) NOT NULL COMMENT 'operation action',
+    target_type VARCHAR(100) NOT NULL COMMENT 'target type',
+    target_id VARCHAR(128) NOT NULL COMMENT 'target id',
+    detail TEXT NULL COMMENT 'operation detail',
+    created_at DATETIME(6) NOT NULL COMMENT 'created time',
+    KEY idx_operation_log_operator_created (operator, created_at),
+    KEY idx_operation_log_target_created (target_type, target_id, created_at),
+    KEY idx_operation_log_action_created (action, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

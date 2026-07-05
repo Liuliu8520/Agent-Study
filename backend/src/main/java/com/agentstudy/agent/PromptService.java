@@ -14,9 +14,11 @@ public class PromptService {
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_.-]+)\\s*}}");
 
     private final PromptTemplateRepository repository;
+    private final PromptTemplateVersionRepository versionRepository;
 
-    public PromptService(PromptTemplateRepository repository) {
+    public PromptService(PromptTemplateRepository repository, PromptTemplateVersionRepository versionRepository) {
         this.repository = repository;
+        this.versionRepository = versionRepository;
         initializeDefaultTemplates();
     }
 
@@ -30,7 +32,30 @@ public class PromptService {
     }
 
     public PromptTemplate saveTemplate(PromptTemplate template) {
-        return repository.save(template);
+        return saveTemplate(template, "system");
+    }
+
+    public PromptTemplate saveTemplate(PromptTemplate template, String operator) {
+        PromptTemplate saved = repository.save(template);
+        versionRepository.saveVersion(saved, operator, true);
+        return saved;
+    }
+
+    public List<PromptTemplateVersion> listVersions(String code) {
+        getTemplate(code);
+        return versionRepository.findByCode(code);
+    }
+
+    public PromptTemplate activateVersion(String code, String versionId) {
+        PromptTemplateVersion version = versionRepository.findById(versionId)
+                .orElseThrow(() -> BusinessException.notFound("Prompt template version not found: " + versionId));
+        if (!version.code().equals(code)) {
+            throw BusinessException.badRequest("Prompt template version does not belong to code: " + code);
+        }
+
+        PromptTemplate template = repository.save(version.toTemplate());
+        versionRepository.activate(code, versionId);
+        return template;
     }
 
     public RenderedPrompt render(String code, Map<String, Object> variables) {
@@ -59,9 +84,14 @@ public class PromptService {
 
     private void initializeDefaultTemplates() {
         loadDefaultTemplates().values().forEach(template -> {
-            if (repository.findByCode(template.code()).isEmpty()) {
-                repository.save(template);
-            }
+            repository.findByCode(template.code()).ifPresentOrElse(existing -> {
+                if (versionRepository.findByCode(existing.code()).isEmpty()) {
+                    versionRepository.saveVersion(existing, "system", true);
+                }
+            }, () -> {
+                PromptTemplate saved = repository.save(template);
+                versionRepository.saveVersion(saved, "system", true);
+            });
         });
     }
 

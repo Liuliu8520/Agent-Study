@@ -31,10 +31,11 @@ Backend modules:
 - learn: learning sessions, `LearningState`, `LearningOrchestrator`.
 - learn.persistence: MySQL snapshot storage and Redis session cache.
 - agent: PromptService, Mock LLM Client, AgentCallLog, and Agent debug APIs.
-- rag: knowledge chunks, repository abstraction, and keyword retrieval for the P0 RAG entry.
+- rag: knowledge chunks, embedding client abstraction, and vector retrieval for the RAG entry.
 - rag.persistence: MySQL knowledge chunk repository for dev profile.
 - statistics: learning session, weak point, and Agent call dashboard APIs.
 - admin: JWT login and protected backend management APIs.
+- admin.audit: operation logs for Prompt and knowledge base management.
 
 ## Current Backend Status
 
@@ -48,6 +49,7 @@ Implemented:
 - `GET /v3/api-docs/agent-study` and `/swagger-ui.html` expose OpenAPI/Swagger documentation.
 - `POST /api/admin/auth/login` admin login issues JWT.
 - `GET /api/admin/me` verifies JWT-protected admin access.
+- Admin APIs can query operation logs, Prompt versions, and manage RAG knowledge chunks.
 - `POST /api/learn/sessions/{sessionId}/diagnosis/questions` generate Step 1 diagnosis questions.
 - `POST /api/learn/sessions/{sessionId}/diagnosis/submit` submit Step 1 diagnosis answers.
 - `POST /api/learn/sessions/{sessionId}/plan` generate Step 2 3-day learning plan.
@@ -62,13 +64,15 @@ Implemented:
 - MySQL `exercise_attempt` table auto initialization.
 - Redis cache key: `agent-study:learning-session:{sessionId}`.
 - `PromptService` with 5 default Agent prompt templates.
-- Prompt templates can be stored in MySQL through `prompt_template` and updated through JWT-protected `PUT /api/agent/prompts/{code}`.
+- Prompt templates can be stored in MySQL through `prompt_template`, updated through JWT-protected `PUT /api/agent/prompts/{code}`, and versioned through `prompt_template_version`.
 - `MockLlmClient` for deterministic local Agent calls without an API key.
 - OpenAI-compatible real LLM client can be enabled by configuration while keeping Mock fallback.
 - `AgentCallLog` with default in-memory storage and dev MySQL storage.
 - Agent debug APIs under `/api/agent`.
 - Agent call logs can be filtered by `sessionId`, `agentType`, `status`, and `promptCode`.
-- `knowledge_chunk` repository abstraction with default in-memory storage and dev MySQL storage.
+- `knowledge_chunk` repository abstraction with default in-memory storage, dev MySQL storage, embedding JSON, and soft delete.
+- `EmbeddingClient` and `VectorSearchService` provide deterministic local vector retrieval.
+- `OperationLogService` records Prompt and knowledge base management actions.
 - RAG debug APIs under `/api/rag`.
 - Statistics dashboard API under `/api/statistics/dashboard`.
 - Step 1 diagnosis result analysis now invokes the `diagnosis.default` Mock Agent and records AgentCallLog.
@@ -132,8 +136,7 @@ Recommended commit style:
 
 ## Next Milestone
 
-- Replace keyword RAG retrieval with embedding/vector search.
-- Add a small admin UI or API workflow for viewing Prompt templates and Agent call logs.
+- Add a small admin UI for viewing Prompt templates, Prompt versions, operation logs, and Agent call logs.
 - Evolve diagnosis output from weak point extraction to a structured diagnosis report.
 - Add frontend student learning flow pages.
 - Add deployment/demo polish: Dockerized backend profile, environment templates, and demo script.

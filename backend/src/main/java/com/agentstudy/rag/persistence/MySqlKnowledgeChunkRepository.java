@@ -27,6 +27,8 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
 
     private static final TypeReference<List<String>> TAG_LIST_TYPE = new TypeReference<>() {
     };
+    private static final TypeReference<List<Double>> EMBEDDING_LIST_TYPE = new TypeReference<>() {
+    };
 
     private static final String CREATE_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS knowledge_chunk (
@@ -35,6 +37,7 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
                 title VARCHAR(200) NOT NULL COMMENT 'chunk title',
                 content TEXT NOT NULL COMMENT 'chunk content',
                 tags_json JSON NOT NULL COMMENT 'retrieval tags',
+                embedding_json JSON NULL COMMENT 'embedding vector',
                 enabled TINYINT NOT NULL DEFAULT 1 COMMENT 'whether chunk is enabled',
                 created_at DATETIME(6) NOT NULL COMMENT 'created time',
                 updated_at DATETIME(6) NOT NULL COMMENT 'updated time',
@@ -45,13 +48,14 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
 
     private static final String UPSERT_SQL = """
             INSERT INTO knowledge_chunk (
-                chunk_id, chapter, title, content, tags_json, enabled, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+                chunk_id, chapter, title, content, tags_json, embedding_json, enabled, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
             ON DUPLICATE KEY UPDATE
                 chapter = VALUES(chapter),
                 title = VALUES(title),
                 content = VALUES(content),
                 tags_json = VALUES(tags_json),
+                embedding_json = VALUES(embedding_json),
                 enabled = VALUES(enabled),
                 updated_at = VALUES(updated_at)
             """;
@@ -72,9 +76,11 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
 
     @PostConstruct
     void initializeSchemaAndSeedData() {
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement(CREATE_TABLE_SQL)) {
-            statement.executeUpdate();
+        try (Connection connection = openConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(CREATE_TABLE_SQL)) {
+                statement.executeUpdate();
+            }
+            ensureEmbeddingColumn(connection);
         } catch (SQLException exception) {
             throw new IllegalStateException("Failed to initialize knowledge_chunk table", exception);
         }
@@ -94,8 +100,9 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
             statement.setString(3, chunk.title());
             statement.setString(4, chunk.content());
             statement.setString(5, toJson(chunk.tags()));
-            statement.setTimestamp(6, Timestamp.from(now));
+            statement.setString(6, chunk.embedding().isEmpty() ? null : toJson(chunk.embedding()));
             statement.setTimestamp(7, Timestamp.from(now));
+            statement.setTimestamp(8, Timestamp.from(now));
             statement.executeUpdate();
             return chunk;
         } catch (SQLException exception) {
@@ -139,6 +146,19 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
     }
 
     @Override
+    public void deleteById(String id) {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE knowledge_chunk SET enabled = 0, updated_at = CURRENT_TIMESTAMP(6) WHERE chunk_id = ?"
+             )) {
+            statement.setString(1, id);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            throw new IllegalStateException("Failed to delete knowledge chunk: " + id, exception);
+        }
+    }
+
+    @Override
     public int count() {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM knowledge_chunk WHERE enabled = 1");
@@ -156,15 +176,30 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
                 resultSet.getString("chapter"),
                 resultSet.getString("title"),
                 resultSet.getString("content"),
-                fromJson(resultSet.getString("tags_json"))
+                fromJson(resultSet.getString("tags_json")),
+                fromEmbeddingJson(resultSet.getString("embedding_json"))
         );
     }
 
-    private String toJson(List<String> tags) {
+    private void ensureEmbeddingColumn(Connection connection) throws SQLException {
+        try (ResultSet columns = connection.getMetaData().getColumns(null, null, "knowledge_chunk", "embedding_json")) {
+            if (columns.next()) {
+                return;
+            }
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                "ALTER TABLE knowledge_chunk ADD COLUMN embedding_json JSON NULL COMMENT 'embedding vector' AFTER tags_json"
+        )) {
+            statement.executeUpdate();
+        }
+    }
+
+    private String toJson(Object value) {
         try {
-            return objectMapper.writeValueAsString(tags);
+            return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException exception) {
-            throw new IllegalStateException("Failed to serialize knowledge chunk tags", exception);
+            throw new IllegalStateException("Failed to serialize knowledge chunk JSON field", exception);
         }
     }
 
@@ -173,6 +208,17 @@ public class MySqlKnowledgeChunkRepository implements KnowledgeChunkRepository {
             return objectMapper.readValue(json, TAG_LIST_TYPE);
         } catch (JsonProcessingException exception) {
             throw new IllegalStateException("Failed to deserialize knowledge chunk tags", exception);
+        }
+    }
+
+    private List<Double> fromEmbeddingJson(String json) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(json, EMBEDDING_LIST_TYPE);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Failed to deserialize knowledge chunk embedding", exception);
         }
     }
 

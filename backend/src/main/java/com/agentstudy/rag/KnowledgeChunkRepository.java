@@ -11,5 +11,7 @@ public interface KnowledgeChunkRepository {
 
     List<KnowledgeChunk> findAll();
 
+    void deleteById(String id);
+
     int count();
 }

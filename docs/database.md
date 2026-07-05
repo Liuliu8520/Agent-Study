@@ -1,12 +1,14 @@
 # 数据库设计
 
-当前阶段已经落地五类核心数据：
+当前阶段已经落地七类核心数据：
 
 - 学习会话状态快照：支撑学生端 5 步学习闭环的恢复和查询。
 - 练习提交记录：沉淀学生练习答案、判卷结果和错误率。
 - Agent 调用日志：支撑 Prompt、模型输入输出、耗时和失败原因追踪。
 - Prompt 模板：支撑 Agent Prompt 的持久化和在线更新。
-- RAG 知识切片：支撑微讲义生成前的关键词召回。
+- Prompt 模板版本：支撑历史版本追踪和回滚启用。
+- RAG 知识切片：支撑微讲义生成前的向量检索。
+- 后台操作审计：记录 Prompt 和知识库管理动作。
 
 ## learning_session
 
@@ -53,7 +55,7 @@
 
 ## prompt_template
 
-用途：保存 Agent Prompt 模板，支持通过 API 新增和更新。
+用途：保存 Agent Prompt 当前启用版本，支持通过 API 新增和更新。
 
 字段：
 
@@ -69,6 +71,28 @@
 索引：
 
 - `idx_prompt_template_agent_type`: 按 Agent 类型筛选 Prompt 模板。
+
+## prompt_template_version
+
+用途：保存 Prompt 模板历史版本，支持查看版本历史和激活旧版本。
+
+字段：
+
+- `version_id`: Prompt 版本 ID，主键。
+- `code`: Prompt 模板编码。
+- `agent_type`: Agent 类型。
+- `version_label`: 业务版本号，例如 `v2`。
+- `name`: 模板展示名。
+- `system_prompt`: system prompt。
+- `user_prompt_template`: 带变量占位符的 user prompt。
+- `active`: 是否为当前启用版本。
+- `created_by`: 操作管理员。
+- `created_at`: 创建时间。
+
+索引：
+
+- `idx_prompt_template_version_code_created`: 按 Prompt 编码查看历史版本。
+- `idx_prompt_template_version_code_active`: 快速定位启用版本。
 
 ## exercise_attempt
 
@@ -99,6 +123,7 @@
 - `title`: 切片标题。
 - `content`: 切片正文。
 - `tags_json`: 检索标签 JSON 数组，例如 `["derivative", "chain_rule"]`。
+- `embedding_json`: 知识切片向量，默认由本地 `HashEmbeddingClient` 生成。
 - `enabled`: 是否启用。
 - `created_at`: 创建时间。
 - `updated_at`: 更新时间。
@@ -109,6 +134,26 @@
 - `idx_knowledge_chunk_enabled_updated`: 按启用状态和更新时间筛选。
 
 `dev` profile 下，如果 `knowledge_chunk` 表为空，后端会自动写入当前内置的高数基础切片，保证本地启动后可以直接检索。
+
+## operation_log
+
+用途：记录后台关键操作，方便审计 Prompt 调整、知识库维护和问题排查。
+
+字段：
+
+- `log_id`: 操作日志 ID，主键。
+- `operator`: 操作管理员。
+- `action`: 操作动作，例如 `PROMPT_TEMPLATE_UPSERT`。
+- `target_type`: 操作对象类型，例如 `PROMPT_TEMPLATE`、`KNOWLEDGE_CHUNK`。
+- `target_id`: 操作对象 ID。
+- `detail`: 操作说明。
+- `created_at`: 创建时间。
+
+索引：
+
+- `idx_operation_log_operator_created`: 按操作人查看历史。
+- `idx_operation_log_target_created`: 按对象查看操作链路。
+- `idx_operation_log_action_created`: 按动作筛选。
 
 DDL 文件：
 
@@ -135,4 +180,3 @@ Value：`LearningState` JSON 快照。
 ## 后续规划表
 
 - `admin_user`: 管理员账号。
-- `operation_log`: 后台操作审计。

@@ -5,7 +5,8 @@
 - 默认 profile 使用内存 `PromptTemplateRepository`。
 - `dev` profile 使用 MySQL `prompt_template` 表。
 - 启动时会自动补齐 5 个默认模板。
-- 可以通过 `PUT /api/agent/prompts/{code}` 新增或更新模板。
+- 可以通过 `PUT /api/agent/prompts/{code}` 新增或更新模板，该写接口需要管理员 Bearer Token。
+- 每次新增或更新都会写入 `prompt_template_version`，后台可查询版本历史并激活旧版本。
 
 ## 模板列表
 
@@ -28,6 +29,15 @@ Prompt 模板使用双花括号变量：
 ```
 
 `PromptService` 会用请求中的 `variables` 字段替换变量。缺失变量会保留原占位符，方便调试 Prompt 是否缺参。
+
+## 版本管理
+
+```http
+GET /api/admin/prompts/{code}/versions
+POST /api/admin/prompts/{code}/versions/{versionId}/activate
+```
+
+版本管理接口用于查看 Prompt 修改历史和回滚启用旧版本，所有操作都会写入 `operation_log`。
 
 ## Mock LLM
 

@@ -11,6 +11,13 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `GET /swagger-ui.html` Swagger UI 页面
 - `POST /api/admin/auth/login` 后台管理员登录并获取 JWT
 - `GET /api/admin/me` 查询当前后台管理员，需要 Bearer Token
+- `GET /api/admin/operation-logs` 查询后台操作审计日志
+- `GET /api/admin/prompts/{code}/versions` 查询 Prompt 模板版本历史
+- `POST /api/admin/prompts/{code}/versions/{versionId}/activate` 激活指定 Prompt 历史版本
+- `POST /api/admin/rag/chunks` 后台新增知识切片并生成 embedding
+- `PUT /api/admin/rag/chunks/{chunkId}` 后台更新知识切片并重新生成 embedding
+- `DELETE /api/admin/rag/chunks/{chunkId}` 后台软删除知识切片
+- `POST /api/admin/rag/chunks/{chunkId}/embedding` 后台重新生成知识切片 embedding
 - `POST /api/learn/sessions` 创建学习会话
 - `GET /api/learn/sessions` 查询学习会话列表，支持 `studentName`、`status`、`limit`
 - `GET /api/learn/sessions/{sessionId}` 查询学习会话
@@ -27,7 +34,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `POST /api/agent/mock-chat` 调用 Mock LLM Client
 - `GET /api/agent/call-logs` 查询 Agent 调用日志，支持 `sessionId`、`agentType`、`status`、`promptCode`、`limit`
 - `GET /api/rag/chunks` 查询 RAG 知识切片
-- `POST /api/rag/retrieve` 按关键词检索知识切片
+- `POST /api/rag/retrieve` 基于本地 Hash Embedding 向量相似度和关键词加权检索知识切片
 - `GET /api/statistics/dashboard` 查询学习会话、薄弱点和 Agent 调用统计
 
 持久化状态：
@@ -37,7 +44,9 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `dev` profile 使用 MySQL 保存 `exercise_attempt`，默认 profile 使用内存练习提交记录仓库。
 - `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
 - `dev` profile 使用 MySQL 保存 `prompt_template`，默认 profile 使用内存 Prompt 模板仓库。
-- `dev` profile 使用 MySQL 保存 `knowledge_chunk`，表为空时自动写入默认高数切片。
+- `dev` profile 使用 MySQL 保存 `prompt_template_version`，默认 profile 使用内存 Prompt 版本仓库。
+- `dev` profile 使用 MySQL 保存 `knowledge_chunk` 和 `embedding_json`，表为空时自动写入默认高数切片。
+- `dev` profile 使用 MySQL 保存 `operation_log`，默认 profile 使用内存审计日志仓库。
 - 默认使用 `MockLlmClient`，可通过配置切换到 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback。
 - Step 1 诊断结果分析会调用 `diagnosis.default` Mock Agent，并写入 Agent 调用日志。
 - Step 2 学习计划生成会调用 `planner.three-day` Mock Agent，并写入 Agent 调用日志。

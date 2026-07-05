@@ -38,6 +38,8 @@ Authorization: Bearer jwt-token
 
 该接口属于后台管理操作，需要先通过 `POST /api/admin/auth/login` 获取管理员 Bearer Token。
 
+每次新增或更新都会写入一条 Prompt 版本记录，可通过后台接口查看历史并激活旧版本。
+
 ## 调用 Mock Agent
 
 ```http

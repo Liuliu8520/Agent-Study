@@ -33,11 +33,13 @@ Agent_Study/
 - Redis 缓存热点学习会话
 - `PromptService` 内置 5 类 Agent Prompt 模板
 - `prompt_template` 支撑 Prompt 模板持久化和在线更新，写接口已接入后台 JWT 鉴权
+- `prompt_template_version` 支撑 Prompt 模板版本历史和回滚启用
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
 - 可配置 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
 - Agent 调用日志支持按会话、Agent 类型、状态和 Prompt 编码筛选
-- `knowledge_chunk` 支撑 RAG 知识切片持久化和关键词召回
+- `knowledge_chunk` 支撑 RAG 知识切片持久化、后台管理和向量检索
+- `operation_log` 记录 Prompt 和知识库后台操作审计
 - `statistics` 模块提供学习会话、薄弱点和 Agent 调用统计
 - Step 1 诊断结果分析已接入 `diagnosis.default` Agent 调用日志
 - Step 2 学习计划生成已接入 `planner.three-day` Agent 调用日志

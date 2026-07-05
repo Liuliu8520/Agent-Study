@@ -152,6 +152,13 @@ GET /api/agent/call-logs/{callId}
 ```http
 POST /api/admin/auth/login
 GET /api/admin/me
+GET /api/admin/operation-logs
+GET /api/admin/prompts/{code}/versions
+POST /api/admin/prompts/{code}/versions/{versionId}/activate
+POST /api/admin/rag/chunks
+PUT /api/admin/rag/chunks/{chunkId}
+DELETE /api/admin/rag/chunks/{chunkId}
+POST /api/admin/rag/chunks/{chunkId}/embedding
 ```
 
 详见 [admin-api.md](admin-api.md)。

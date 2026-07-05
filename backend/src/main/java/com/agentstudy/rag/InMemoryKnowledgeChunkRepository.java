@@ -38,6 +38,11 @@ public class InMemoryKnowledgeChunkRepository implements KnowledgeChunkRepositor
     }
 
     @Override
+    public void deleteById(String id) {
+        chunks.remove(id);
+    }
+
+    @Override
     public int count() {
         return chunks.size();
     }
