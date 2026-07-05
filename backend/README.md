@@ -7,6 +7,8 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 已完成学生端 P0 学习闭环：
 
 - `GET /api/health` 健康检查
+- `GET /v3/api-docs/agent-study` OpenAPI 文档 JSON
+- `GET /swagger-ui.html` Swagger UI 页面
 - `POST /api/learn/sessions` 创建学习会话
 - `GET /api/learn/sessions` 查询学习会话列表，支持 `studentName`、`status`、`limit`
 - `GET /api/learn/sessions/{sessionId}` 查询学习会话
@@ -62,6 +64,13 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 
 ```text
 GET http://localhost:8080/api/health
+```
+
+接口文档：
+
+```text
+http://localhost:8080/swagger-ui.html
+http://localhost:8080/v3/api-docs/agent-study
 ```
 
 ## MySQL/Redis 模式启动
