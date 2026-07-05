@@ -31,7 +31,8 @@ Backend modules:
 - learn: learning sessions, `LearningState`, `LearningOrchestrator`.
 - learn.persistence: MySQL snapshot storage and Redis session cache.
 - agent: PromptService, Mock LLM Client, AgentCallLog, and Agent debug APIs.
-- rag: in-memory knowledge chunks and keyword retrieval for the P0 RAG entry.
+- rag: knowledge chunks, repository abstraction, and keyword retrieval for the P0 RAG entry.
+- rag.persistence: MySQL knowledge chunk repository for dev profile.
 - admin: planned admin login and prompt management.
 - statistics: planned weak point and Agent call statistics.
 
@@ -58,6 +59,8 @@ Implemented:
 - `MockLlmClient` for deterministic local Agent calls without an API key.
 - `AgentCallLog` with default in-memory storage and dev MySQL storage.
 - Agent debug APIs under `/api/agent`.
+- `knowledge_chunk` repository abstraction with default in-memory storage and dev MySQL storage.
+- RAG debug APIs under `/api/rag`.
 - Context loading, API flow, and JSON snapshot codec tests.
 
 ## Local Commands
@@ -114,7 +117,6 @@ Recommended commit style:
 
 ## Next Milestone
 
-- Add real `knowledge_chunk` persistence.
 - Replace keyword retrieval with embedding/vector search.
 - Move prompt templates from memory to a `prompt_template` table.
 - Replace deterministic planner logic with `PlannerAgent`.

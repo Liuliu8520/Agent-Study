@@ -30,6 +30,7 @@ Agent_Study/
 - `PromptService` 内置 5 类 Agent Prompt 模板
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
+- `knowledge_chunk` 支撑 RAG 知识切片持久化和关键词召回
 
 ## 后端运行
 

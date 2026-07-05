@@ -31,7 +31,7 @@ import com.agentstudy.learn.exercise.ExpressionJudgeService;
 import com.agentstudy.learn.review.ReviewGenerator;
 import com.agentstudy.learn.review.ReviewResult;
 import com.agentstudy.rag.RetrievedKnowledgeChunk;
-import com.agentstudy.rag.SimpleRagService;
+import com.agentstudy.rag.RagService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class LearningOrchestrator {
     private final LearningSessionRepository repository;
     private final DiagnosisQuestionBank diagnosisQuestionBank;
     private final LearningPlanGenerator learningPlanGenerator;
-    private final SimpleRagService simpleRagService;
+    private final RagService ragService;
     private final MicroLessonGenerator microLessonGenerator;
     private final ExerciseGenerator exerciseGenerator;
     private final ExpressionJudgeService expressionJudgeService;
@@ -54,7 +54,7 @@ public class LearningOrchestrator {
             LearningSessionRepository repository,
             DiagnosisQuestionBank diagnosisQuestionBank,
             LearningPlanGenerator learningPlanGenerator,
-            SimpleRagService simpleRagService,
+            RagService ragService,
             MicroLessonGenerator microLessonGenerator,
             ExerciseGenerator exerciseGenerator,
             ExpressionJudgeService expressionJudgeService,
@@ -63,7 +63,7 @@ public class LearningOrchestrator {
         this.repository = repository;
         this.diagnosisQuestionBank = diagnosisQuestionBank;
         this.learningPlanGenerator = learningPlanGenerator;
-        this.simpleRagService = simpleRagService;
+        this.ragService = ragService;
         this.microLessonGenerator = microLessonGenerator;
         this.exerciseGenerator = exerciseGenerator;
         this.expressionJudgeService = expressionJudgeService;
@@ -155,7 +155,7 @@ public class LearningOrchestrator {
             throw BusinessException.badRequest("Learning plan has not been generated");
         }
 
-        List<RetrievedKnowledgeChunk> retrievedChunks = simpleRagService.retrieve(state.getWeakPoints(), state.getLearningPlan());
+        List<RetrievedKnowledgeChunk> retrievedChunks = ragService.retrieve(state.getWeakPoints(), state.getLearningPlan());
         String lessonMarkdown = microLessonGenerator.generate(state.getLearningPlan(), state.getWeakPoints(), retrievedChunks);
         state.setRetrievedChunks(retrievedChunks);
         state.setGeneratedLesson(lessonMarkdown);

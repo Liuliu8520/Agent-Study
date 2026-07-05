@@ -26,3 +26,16 @@ CREATE TABLE IF NOT EXISTS agent_call_log (
     KEY idx_agent_call_log_session_created (session_id, created_at),
     KEY idx_agent_call_log_agent_created (agent_type, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS knowledge_chunk (
+    chunk_id VARCHAR(64) NOT NULL PRIMARY KEY COMMENT 'knowledge chunk id',
+    chapter VARCHAR(100) NOT NULL COMMENT 'chapter name',
+    title VARCHAR(200) NOT NULL COMMENT 'chunk title',
+    content TEXT NOT NULL COMMENT 'chunk content',
+    tags_json JSON NOT NULL COMMENT 'retrieval tags',
+    enabled TINYINT NOT NULL DEFAULT 1 COMMENT 'whether chunk is enabled',
+    created_at DATETIME(6) NOT NULL COMMENT 'created time',
+    updated_at DATETIME(6) NOT NULL COMMENT 'updated time',
+    KEY idx_knowledge_chunk_chapter (chapter),
+    KEY idx_knowledge_chunk_enabled_updated (enabled, updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

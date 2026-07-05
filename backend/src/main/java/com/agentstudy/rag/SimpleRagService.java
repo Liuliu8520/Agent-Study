@@ -10,29 +10,41 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SimpleRagService {
+public class SimpleRagService implements RagService {
 
-    private final InMemoryKnowledgeBase knowledgeBase;
+    private final KnowledgeChunkRepository knowledgeChunkRepository;
 
-    public SimpleRagService(InMemoryKnowledgeBase knowledgeBase) {
-        this.knowledgeBase = knowledgeBase;
+    public SimpleRagService(KnowledgeChunkRepository knowledgeChunkRepository) {
+        this.knowledgeChunkRepository = knowledgeChunkRepository;
     }
 
+    @Override
     public List<RetrievedKnowledgeChunk> retrieve(List<WeakPoint> weakPoints, LearningPlan plan) {
         Set<String> keywords = buildKeywords(weakPoints, plan);
-        List<RetrievedKnowledgeChunk> retrieved = knowledgeBase.listChunks().stream()
+        return retrieveByKeywordSet(keywords, 4);
+    }
+
+    @Override
+    public List<RetrievedKnowledgeChunk> retrieveByKeywords(List<String> keywords, int limit) {
+        Set<String> keywordSet = keywords == null ? Set.of() : new LinkedHashSet<>(keywords);
+        return retrieveByKeywordSet(keywordSet, limit);
+    }
+
+    private List<RetrievedKnowledgeChunk> retrieveByKeywordSet(Set<String> keywords, int limit) {
+        int safeLimit = Math.min(Math.max(limit, 1), 10);
+        List<RetrievedKnowledgeChunk> retrieved = knowledgeChunkRepository.findAll().stream()
                 .map(chunk -> toRetrievedChunk(chunk, score(chunk, keywords)))
                 .filter(chunk -> chunk.score() > 0)
                 .sorted(Comparator.comparingDouble(RetrievedKnowledgeChunk::score).reversed())
-                .limit(4)
+                .limit(safeLimit)
                 .toList();
 
         if (!retrieved.isEmpty()) {
             return retrieved;
         }
 
-        return knowledgeBase.listChunks().stream()
-                .limit(3)
+        return knowledgeChunkRepository.findAll().stream()
+                .limit(Math.min(safeLimit, 3))
                 .map(chunk -> toRetrievedChunk(chunk, 1.0))
                 .toList();
     }
@@ -72,4 +84,3 @@ public class SimpleRagService {
         return new RetrievedKnowledgeChunk(chunk.id(), chunk.chapter(), chunk.title(), chunk.content(), score);
     }
 }
-

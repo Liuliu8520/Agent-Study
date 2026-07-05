@@ -4,6 +4,7 @@
 
 - 学习会话状态快照：支撑学生端 5 步学习闭环的恢复和查询。
 - Agent 调用日志：支撑 Prompt、模型输入输出、耗时和失败原因追踪。
+- RAG 知识切片：支撑微讲义生成前的关键词召回。
 
 ## learning_session
 
@@ -48,6 +49,28 @@
 - `idx_agent_call_log_session_created`: 按学习会话查看 Agent 调用链路。
 - `idx_agent_call_log_agent_created`: 按 Agent 类型统计调用情况。
 
+## knowledge_chunk
+
+用途：保存高数知识库切片，供 RAG 检索使用。
+
+字段：
+
+- `chunk_id`: 知识切片 ID，主键。
+- `chapter`: 所属章节。
+- `title`: 切片标题。
+- `content`: 切片正文。
+- `tags_json`: 检索标签 JSON 数组，例如 `["derivative", "chain_rule"]`。
+- `enabled`: 是否启用。
+- `created_at`: 创建时间。
+- `updated_at`: 更新时间。
+
+索引：
+
+- `idx_knowledge_chunk_chapter`: 按章节筛选知识切片。
+- `idx_knowledge_chunk_enabled_updated`: 按启用状态和更新时间筛选。
+
+`dev` profile 下，如果 `knowledge_chunk` 表为空，后端会自动写入当前内置的高数基础切片，保证本地启动后可以直接检索。
+
 DDL 文件：
 
 ```text
@@ -73,7 +96,6 @@ Value：`LearningState` JSON 快照。
 ## 后续规划表
 
 - `exercise_attempt`: 单次练习提交记录和判卷明细。
-- `knowledge_chunk`: RAG 知识切片。
 - `prompt_template`: Agent Prompt 模板。
 - `admin_user`: 管理员账号。
 - `operation_log`: 后台操作审计。
