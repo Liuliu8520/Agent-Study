@@ -32,6 +32,7 @@ Agent_Study/
 - `PromptService` 内置 5 类 Agent Prompt 模板
 - `prompt_template` 支撑 Prompt 模板持久化和在线更新
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
+- 可配置 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
 - Agent 调用日志支持按会话、Agent 类型、状态和 Prompt 编码筛选
 - `knowledge_chunk` 支撑 RAG 知识切片持久化和关键词召回

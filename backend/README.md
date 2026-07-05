@@ -34,6 +34,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
 - `dev` profile 使用 MySQL 保存 `prompt_template`，默认 profile 使用内存 Prompt 模板仓库。
 - `dev` profile 使用 MySQL 保存 `knowledge_chunk`，表为空时自动写入默认高数切片。
+- 默认使用 `MockLlmClient`，可通过配置切换到 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback。
 - Step 1 诊断结果分析会调用 `diagnosis.default` Mock Agent，并写入 Agent 调用日志。
 - Step 2 学习计划生成会调用 `planner.three-day` Mock Agent，并写入 Agent 调用日志。
 - Step 3 RAG 微讲义生成会调用 `lesson.micro` Mock Agent，并写入 Agent 调用日志。
@@ -94,6 +95,14 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 - `AGENT_STUDY_REDIS_HOST`
 - `AGENT_STUDY_REDIS_PORT`
 - `AGENT_STUDY_REDIS_DATABASE`
+
+LLM 可通过环境变量切换：
+
+- `AGENT_STUDY_LLM_PROVIDER`: 默认 `mock`，可设为 `openai-compatible`
+- `AGENT_STUDY_LLM_BASE_URL`: Chat Completions 兼容接口地址
+- `AGENT_STUDY_LLM_API_KEY`: 大模型 API Key
+- `AGENT_STUDY_LLM_MODEL`: 模型名，默认 `glm-4-flash`
+- `AGENT_STUDY_LLM_FALLBACK_TO_MOCK`: 真实调用配置缺失或失败时是否回退 Mock，默认 `true`
 
 ## 打包运行
 

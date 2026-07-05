@@ -14,3 +14,13 @@ management:
     health:
       show-details: always
 
+agent-study:
+  llm:
+    provider: ${AGENT_STUDY_LLM_PROVIDER:mock}
+    base-url: ${AGENT_STUDY_LLM_BASE_URL:}
+    api-key: ${AGENT_STUDY_LLM_API_KEY:}
+    model: ${AGENT_STUDY_LLM_MODEL:glm-4-flash}
+    temperature: ${AGENT_STUDY_LLM_TEMPERATURE:0.2}
+    max-tokens: ${AGENT_STUDY_LLM_MAX_TOKENS:1024}
+    timeout-seconds: ${AGENT_STUDY_LLM_TIMEOUT_SECONDS:30}
+    fallback-to-mock: ${AGENT_STUDY_LLM_FALLBACK_TO_MOCK:true}

@@ -1,14 +1,20 @@
 package com.agentstudy.agent;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "agent-study.llm", name = "provider", havingValue = "mock", matchIfMissing = true)
 public class MockLlmClient implements LlmClient {
 
     private static final String MODEL_NAME = "mock-llm-v1";
 
     @Override
     public LlmResponse complete(LlmRequest request) {
+        return completeMock(request);
+    }
+
+    public static LlmResponse completeMock(LlmRequest request) {
         String content = switch (request.agentType()) {
             case DIAGNOSTICIAN -> "【Mock诊断】已识别学生薄弱点，并给出下一步补强建议。";
             case PLANNER -> "【Mock规划】已生成 3 天递进式学习计划，覆盖概念复习、例题拆解和表达式练习。";
@@ -25,7 +31,7 @@ public class MockLlmClient implements LlmClient {
         );
     }
 
-    private int estimateTokens(String text) {
+    private static int estimateTokens(String text) {
         if (text == null || text.isBlank()) {
             return 0;
         }

@@ -41,3 +41,27 @@ Prompt 模板使用双花括号变量：
 - 调用耗时
 
 这样可以先跑通 Agent 工程链路，后续替换真实 LLM Client 时不用改业务入口。
+
+## 真实 LLM Client
+
+默认配置仍然使用 Mock：
+
+```yaml
+agent-study:
+  llm:
+    provider: mock
+```
+
+如需接入兼容 Chat Completions 格式的真实模型，可以设置：
+
+```yaml
+agent-study:
+  llm:
+    provider: openai-compatible
+    base-url: https://example.com/v1/chat/completions
+    api-key: your-api-key
+    model: glm-4-flash
+    fallback-to-mock: true
+```
+
+`fallback-to-mock=true` 时，如果接口地址、API Key 缺失或真实调用失败，系统会回退到 Mock 输出，保证本地演示流程不断。

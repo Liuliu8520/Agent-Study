@@ -62,6 +62,7 @@ Implemented:
 - `PromptService` with 5 default Agent prompt templates.
 - Prompt templates can be stored in MySQL through `prompt_template` and updated through `/api/agent/prompts/{code}`.
 - `MockLlmClient` for deterministic local Agent calls without an API key.
+- OpenAI-compatible real LLM client can be enabled by configuration while keeping Mock fallback.
 - `AgentCallLog` with default in-memory storage and dev MySQL storage.
 - Agent debug APIs under `/api/agent`.
 - Agent call logs can be filtered by `sessionId`, `agentType`, `status`, and `promptCode`.
