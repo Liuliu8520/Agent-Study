@@ -1,6 +1,7 @@
 package com.agentstudy.learn;
 
 import com.agentstudy.common.BusinessException;
+import com.agentstudy.learn.diagnosis.DiagnosisAgentService;
 import com.agentstudy.learn.diagnosis.DiagnosisQuestion;
 import com.agentstudy.learn.diagnosis.DiagnosisQuestionBank;
 import com.agentstudy.learn.diagnosis.WeakPoint;
@@ -43,6 +44,7 @@ public class LearningOrchestrator {
 
     private final LearningSessionRepository repository;
     private final DiagnosisQuestionBank diagnosisQuestionBank;
+    private final DiagnosisAgentService diagnosisAgentService;
     private final LearningPlanGenerator learningPlanGenerator;
     private final RagService ragService;
     private final MicroLessonGenerator microLessonGenerator;
@@ -53,6 +55,7 @@ public class LearningOrchestrator {
     public LearningOrchestrator(
             LearningSessionRepository repository,
             DiagnosisQuestionBank diagnosisQuestionBank,
+            DiagnosisAgentService diagnosisAgentService,
             LearningPlanGenerator learningPlanGenerator,
             RagService ragService,
             MicroLessonGenerator microLessonGenerator,
@@ -62,6 +65,7 @@ public class LearningOrchestrator {
     ) {
         this.repository = repository;
         this.diagnosisQuestionBank = diagnosisQuestionBank;
+        this.diagnosisAgentService = diagnosisAgentService;
         this.learningPlanGenerator = learningPlanGenerator;
         this.ragService = ragService;
         this.microLessonGenerator = microLessonGenerator;
@@ -122,6 +126,14 @@ public class LearningOrchestrator {
 
         state.setDiagnosisAnswers(submittedAnswers);
         state.setWeakPoints(weakPoints);
+        diagnosisAgentService.analyzeResult(
+                state.getSessionId(),
+                state.getStudentName(),
+                correctCount,
+                state.getDiagnosisQuestions().size(),
+                submittedAnswers,
+                weakPoints
+        );
         state.advanceToStep(2);
         repository.save(state);
 

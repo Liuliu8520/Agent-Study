@@ -61,6 +61,7 @@ Implemented:
 - Agent debug APIs under `/api/agent`.
 - `knowledge_chunk` repository abstraction with default in-memory storage and dev MySQL storage.
 - RAG debug APIs under `/api/rag`.
+- Step 1 diagnosis result analysis now invokes the `diagnosis.default` Mock Agent and records AgentCallLog.
 - Step 2 learning plan generation now invokes the `planner.three-day` Mock Agent and records AgentCallLog.
 - Step 3 micro-lesson generation now invokes the `lesson.micro` Mock Agent and records AgentCallLog.
 - Step 4 exercise generation now invokes the `exercise.generate` Mock Agent and records AgentCallLog.
@@ -124,5 +125,5 @@ Recommended commit style:
 - Replace keyword retrieval with embedding/vector search.
 - Move prompt templates from memory to a `prompt_template` table.
 - Replace deterministic planner logic with `PlannerAgent`.
-- Replace deterministic diagnosis logic with `DiagnosticianAgent`.
+- Evolve `DiagnosisAgentService` from logging/analyzing diagnosis results to structured diagnosis report generation.
 - Add `agent_call_log` for LLM call observability.

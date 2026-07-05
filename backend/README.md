@@ -28,6 +28,7 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `dev` profile 使用 `MySqlRedisLearningSessionRepository`，MySQL 保存 `LearningState` 快照，Redis 缓存热点会话。
 - `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
 - `dev` profile 使用 MySQL 保存 `knowledge_chunk`，表为空时自动写入默认高数切片。
+- Step 1 诊断结果分析会调用 `diagnosis.default` Mock Agent，并写入 Agent 调用日志。
 - Step 2 学习计划生成会调用 `planner.three-day` Mock Agent，并写入 Agent 调用日志。
 - Step 3 RAG 微讲义生成会调用 `lesson.micro` Mock Agent，并写入 Agent 调用日志。
 - Step 4 练习题生成会调用 `exercise.generate` Mock Agent，并写入 Agent 调用日志。
