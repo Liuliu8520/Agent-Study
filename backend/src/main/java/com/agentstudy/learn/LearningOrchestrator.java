@@ -139,7 +139,7 @@ public class LearningOrchestrator {
         LearningState state = getRequiredState(sessionId);
         ensureCurrentStep(state, 2, "Learning plan can only be generated after diagnosis");
 
-        LearningPlan plan = learningPlanGenerator.generate(state.getWeakPoints());
+        LearningPlan plan = learningPlanGenerator.generate(state.getSessionId(), state.getWeakPoints());
         state.setLearningPlan(plan);
         state.advanceToStep(3);
         repository.save(state);

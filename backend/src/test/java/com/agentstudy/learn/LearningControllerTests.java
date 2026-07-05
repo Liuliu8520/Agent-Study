@@ -193,6 +193,13 @@ class LearningControllerTests {
         assertThat(data.path("plan").path("title").asText()).isEqualTo("3 天高数薄弱点补强计划");
         assertThat(data.path("plan").path("days").size()).isEqualTo(3);
         assertThat(data.path("plan").path("days").get(0).path("concepts").toString()).contains("链式法则");
+
+        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+                "/api/agent/call-logs?limit=10",
+                JsonNode.class
+        );
+        assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
+        assertThat(logResponse.getBody().path("data").toString()).contains("planner.three-day");
     }
 
     @Test

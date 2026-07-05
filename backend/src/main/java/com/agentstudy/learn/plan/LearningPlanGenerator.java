@@ -9,8 +9,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class LearningPlanGenerator {
 
-    public LearningPlan generate(List<WeakPoint> weakPoints) {
+    private final LearningPlanAgentService learningPlanAgentService;
+
+    public LearningPlanGenerator(LearningPlanAgentService learningPlanAgentService) {
+        this.learningPlanAgentService = learningPlanAgentService;
+    }
+
+    public LearningPlan generate(String sessionId, List<WeakPoint> weakPoints) {
         List<WeakPoint> effectiveWeakPoints = weakPoints == null ? List.of() : weakPoints;
+        learningPlanAgentService.generateDraft(sessionId, effectiveWeakPoints);
         if (effectiveWeakPoints.isEmpty()) {
             return generateConsolidationPlan();
         }
@@ -75,4 +82,3 @@ public class LearningPlanGenerator {
         );
     }
 }
-

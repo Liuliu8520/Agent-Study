@@ -61,6 +61,7 @@ Implemented:
 - Agent debug APIs under `/api/agent`.
 - `knowledge_chunk` repository abstraction with default in-memory storage and dev MySQL storage.
 - RAG debug APIs under `/api/rag`.
+- Step 2 learning plan generation now invokes the `planner.three-day` Mock Agent and records AgentCallLog.
 - Step 3 micro-lesson generation now invokes the `lesson.micro` Mock Agent and records AgentCallLog.
 - Context loading, API flow, and JSON snapshot codec tests.
 

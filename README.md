@@ -31,6 +31,7 @@ Agent_Study/
 - `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
 - `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
 - `knowledge_chunk` 支撑 RAG 知识切片持久化和关键词召回
+- Step 2 学习计划生成已接入 `planner.three-day` Agent 调用日志
 - Step 3 RAG 微讲义生成已接入 `lesson.micro` Agent 调用日志
 
 ## 后端运行
