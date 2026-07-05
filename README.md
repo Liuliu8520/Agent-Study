@@ -20,6 +20,7 @@ Agent_Study/
 - 后端 Spring Boot 基础骨架
 - 统一响应、业务异常、全局异常处理
 - OpenAPI/Swagger UI 接口文档
+- Spring Security + JWT 后台鉴权
 - 学习会话创建与查询
 - 学习会话列表查询，支持学生名、状态和 limit 筛选
 - Step 1 诊断题生成与弱点识别

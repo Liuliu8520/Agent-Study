@@ -23,6 +23,11 @@ springdoc:
     path: /v3/api-docs
 
 agent-study:
+  admin:
+    username: ${AGENT_STUDY_ADMIN_USERNAME:admin}
+    password: ${AGENT_STUDY_ADMIN_PASSWORD:agentstudy}
+    jwt-secret: ${AGENT_STUDY_ADMIN_JWT_SECRET:agent-study-local-development-secret-change-me}
+    token-ttl-minutes: ${AGENT_STUDY_ADMIN_TOKEN_TTL_MINUTES:120}
   llm:
     provider: ${AGENT_STUDY_LLM_PROVIDER:mock}
     base-url: ${AGENT_STUDY_LLM_BASE_URL:}

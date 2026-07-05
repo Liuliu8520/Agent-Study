@@ -34,8 +34,7 @@ Backend modules:
 - rag: knowledge chunks, repository abstraction, and keyword retrieval for the P0 RAG entry.
 - rag.persistence: MySQL knowledge chunk repository for dev profile.
 - statistics: learning session, weak point, and Agent call dashboard APIs.
-- admin: planned admin login and prompt management.
-- statistics: planned weak point and Agent call statistics.
+- admin: JWT login and protected backend management APIs.
 
 ## Current Backend Status
 
@@ -47,6 +46,8 @@ Implemented:
 - `GET /api/learn/sessions` list learning sessions with optional `studentName`, `status`, and `limit` filters.
 - `GET /api/learn/sessions/{sessionId}` get learning session.
 - `GET /v3/api-docs/agent-study` and `/swagger-ui.html` expose OpenAPI/Swagger documentation.
+- `POST /api/admin/auth/login` admin login issues JWT.
+- `GET /api/admin/me` verifies JWT-protected admin access.
 - `POST /api/learn/sessions/{sessionId}/diagnosis/questions` generate Step 1 diagnosis questions.
 - `POST /api/learn/sessions/{sessionId}/diagnosis/submit` submit Step 1 diagnosis answers.
 - `POST /api/learn/sessions/{sessionId}/plan` generate Step 2 3-day learning plan.

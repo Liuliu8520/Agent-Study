@@ -9,6 +9,8 @@ Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
 - `GET /api/health` 健康检查
 - `GET /v3/api-docs/agent-study` OpenAPI 文档 JSON
 - `GET /swagger-ui.html` Swagger UI 页面
+- `POST /api/admin/auth/login` 后台管理员登录并获取 JWT
+- `GET /api/admin/me` 查询当前后台管理员，需要 Bearer Token
 - `POST /api/learn/sessions` 创建学习会话
 - `GET /api/learn/sessions` 查询学习会话列表，支持 `studentName`、`status`、`limit`
 - `GET /api/learn/sessions/{sessionId}` 查询学习会话
@@ -112,6 +114,13 @@ LLM 可通过环境变量切换：
 - `AGENT_STUDY_LLM_API_KEY`: 大模型 API Key
 - `AGENT_STUDY_LLM_MODEL`: 模型名，默认 `glm-4-flash`
 - `AGENT_STUDY_LLM_FALLBACK_TO_MOCK`: 真实调用配置缺失或失败时是否回退 Mock，默认 `true`
+
+后台管理员可通过环境变量覆盖：
+
+- `AGENT_STUDY_ADMIN_USERNAME`: 默认 `admin`
+- `AGENT_STUDY_ADMIN_PASSWORD`: 默认 `agentstudy`
+- `AGENT_STUDY_ADMIN_JWT_SECRET`: JWT 签名密钥，本地默认值仅用于开发
+- `AGENT_STUDY_ADMIN_TOKEN_TTL_MINUTES`: Token 有效期，默认 120 分钟
 
 ## 打包运行
 

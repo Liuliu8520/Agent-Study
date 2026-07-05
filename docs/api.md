@@ -147,6 +147,15 @@ GET /api/agent/call-logs/{callId}
 
 详见 [agent-api.md](agent-api.md)。
 
+## Admin
+
+```http
+POST /api/admin/auth/login
+GET /api/admin/me
+```
+
+详见 [admin-api.md](admin-api.md)。
+
 ## RAG
 
 ```http
