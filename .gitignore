@@ -1,10 +1,13 @@
 # Maven and Java build output
 target/
 backend/target/
+frontend/dist/
 
 # Local dependency caches and downloaded tools
 .m2/
 .tools/
+.npm-cache/
+frontend/node_modules/
 
 # IDE files
 .idea/
