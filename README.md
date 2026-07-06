@@ -9,7 +9,7 @@
 ```text
 Agent_Study/
 ├── backend/   Spring Boot 后端
-├── frontend/  前端预留目录
+├── frontend/  Vue3 学生端与后台管理端
 ├── docker/    MySQL、Redis 本地开发环境
 ├── docs/      API、数据库、Prompt 文档
 └── Agent.md   开发协作说明
@@ -46,6 +46,8 @@ Agent_Study/
 - Step 3 RAG 微讲义生成已接入 `lesson.micro` Agent 调用日志
 - Step 4 练习题生成已接入 `exercise.generate` Agent 调用日志
 - Step 5 智能复习生成已接入 `review.feedback` Agent 调用日志
+- Vue3 前端学生端支持步骤条式学习流程、多智能体工作台日志、Markdown/KaTeX 微讲义渲染和数学表达式快捷输入
+- Vue3 后台端支持 Prompt 管理、版本启用、RAG 知识库维护、操作审计、Agent 调用日志和统计洞察
 
 ## 后端运行
 
@@ -53,7 +55,7 @@ Agent_Study/
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run
 ```
 
 MySQL/Redis 模式：
@@ -63,7 +65,9 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
 docker compose -f .\docker\docker-compose.yml up -d
 
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run "-Dspring-boot.run.profiles=dev"
+$env:AGENT_STUDY_MYSQL_USERNAME="root"
+$env:AGENT_STUDY_MYSQL_PASSWORD="<你的 MySQL 密码>"
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 健康检查：
@@ -84,4 +88,25 @@ http://localhost:8080/v3/api-docs/agent-study
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" test
+```
+
+## 前端运行
+
+```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\frontend
+npm.cmd install --cache ..\.npm-cache
+npm.cmd run dev
+```
+
+访问：
+
+```text
+学生端：http://localhost:5173
+后台端：http://localhost:5173/admin
+```
+
+后台默认账号：
+
+```text
+admin / agentstudy
 ```

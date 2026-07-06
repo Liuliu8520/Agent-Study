@@ -14,7 +14,7 @@
     <div v-if="error" class="alert danger">{{ error }}</div>
     <div v-if="notice" class="alert success">{{ notice }}</div>
 
-    <section v-if="!auth.loggedIn" class="login-panel">
+    <section v-if="!auth.loggedIn" class="login-panel auth-panel">
       <div class="panel-title">
         <h2>后台登录</h2>
       </div>
@@ -32,7 +32,7 @@
     </section>
 
     <template v-else>
-      <section class="status-strip">
+      <section class="status-strip admin-metrics">
         <div>
           <span>会话总数</span>
           <strong>{{ statistics?.sessions?.totalSessions ?? '-' }}</strong>
@@ -49,6 +49,52 @@
           <span>薄弱点</span>
           <strong>{{ statistics?.weakPoints?.length ?? '-' }}</strong>
         </div>
+      </section>
+
+      <section class="insight-grid">
+        <article class="work-panel insight-panel">
+          <div class="panel-title">
+            <h2>薄弱点排行</h2>
+          </div>
+          <div v-if="weakPointBars.length" class="bar-list">
+            <div v-for="item in weakPointBars" :key="item.code" class="bar-row">
+              <div>
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.latestReason }}</span>
+              </div>
+              <div class="bar-track">
+                <i :style="{ width: `${item.percent}%` }"></i>
+              </div>
+              <em>{{ item.count }}</em>
+            </div>
+          </div>
+          <div v-else class="empty-state compact-state">
+            <strong>暂无薄弱点数据</strong>
+            <span>完成诊断后，这里会出现高频薄弱知识点。</span>
+          </div>
+        </article>
+
+        <article class="work-panel insight-panel">
+          <div class="panel-title">
+            <h2>Agent 耗时</h2>
+          </div>
+          <div v-if="agentDurationBars.length" class="bar-list">
+            <div v-for="item in agentDurationBars" :key="item.agentType" class="bar-row">
+              <div>
+                <strong>{{ item.agentType }}</strong>
+                <span>{{ item.callCount }} 次调用</span>
+              </div>
+              <div class="bar-track">
+                <i :style="{ width: `${item.percent}%` }"></i>
+              </div>
+              <em>{{ formatMillis(item.averageDurationMillis) }}</em>
+            </div>
+          </div>
+          <div v-else class="empty-state compact-state">
+            <strong>暂无 Agent 调用数据</strong>
+            <span>执行诊断、计划、讲义或复习后会记录调用耗时。</span>
+          </div>
+        </article>
       </section>
 
       <section class="admin-tabs">
@@ -69,7 +115,7 @@
             <h2>Prompt 模板</h2>
             <button class="button small" :disabled="loading" @click="loadPrompts">刷新</button>
           </div>
-          <div class="list-column">
+          <div v-if="prompts.length" class="list-column">
             <button
               v-for="prompt in prompts"
               :key="prompt.code"
@@ -81,9 +127,13 @@
               <span>{{ prompt.agentType }} · {{ prompt.version }}</span>
             </button>
           </div>
+          <div v-else class="empty-state compact-state">
+            <strong>暂无 Prompt 模板</strong>
+            <span>后端启动后会初始化默认模板。</span>
+          </div>
         </article>
 
-        <article class="work-panel wide">
+        <article class="work-panel detail-panel">
           <div class="panel-title">
             <h2>编辑模板</h2>
             <button class="button small primary" :disabled="!promptForm.code || loading" @click="savePrompt">保存</button>
@@ -146,7 +196,7 @@
             <h2>知识切片</h2>
             <button class="button small" :disabled="loading" @click="loadChunks">刷新</button>
           </div>
-          <div class="list-column">
+          <div v-if="chunks.length" class="list-column">
             <button
               v-for="chunk in chunks"
               :key="chunk.id"
@@ -158,9 +208,13 @@
               <span>{{ chunk.chapter }} · {{ chunk.embeddingReady ? '已向量化' : '未向量化' }}</span>
             </button>
           </div>
+          <div v-else class="empty-state compact-state">
+            <strong>暂无知识切片</strong>
+            <span>后端启动后会初始化默认高数知识库。</span>
+          </div>
         </article>
 
-        <article class="work-panel wide">
+        <article class="work-panel detail-panel">
           <div class="panel-title">
             <h2>维护切片</h2>
             <div class="button-row">
@@ -263,7 +317,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useAdminAuthStore } from '../../stores/adminAuth'
 import { adminApi } from '../../api/admin'
 import { agentApi } from '../../api/agent'
@@ -313,6 +367,24 @@ const logFilters = reactive({
   targetType: '',
   targetId: '',
   operator: ''
+})
+
+const weakPointBars = computed(() => {
+  const items = statistics.value?.weakPoints || []
+  const max = Math.max(...items.map((item) => item.count), 1)
+  return items.slice(0, 5).map((item) => ({
+    ...item,
+    percent: Math.max(8, Math.round((item.count / max) * 100))
+  }))
+})
+
+const agentDurationBars = computed(() => {
+  const items = statistics.value?.agentCalls?.byAgentType || []
+  const max = Math.max(...items.map((item) => item.averageDurationMillis), 1)
+  return items.map((item) => ({
+    ...item,
+    percent: Math.max(8, Math.round((item.averageDurationMillis / max) * 100))
+  }))
 })
 
 onMounted(() => {
@@ -496,5 +568,9 @@ function splitText(value) {
 
 function formatTime(value) {
   return value ? new Date(value).toLocaleString() : '-'
+}
+
+function formatMillis(value) {
+  return `${Math.round(Number(value || 0))} ms`
 }
 </script>
