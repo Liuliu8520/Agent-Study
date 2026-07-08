@@ -34,6 +34,9 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
                 model_name VARCHAR(100) NOT NULL COMMENT 'model name',
                 request_payload MEDIUMTEXT NOT NULL COMMENT 'rendered prompt payload',
                 response_text MEDIUMTEXT NULL COMMENT 'llm response text',
+                prompt_tokens INT NOT NULL DEFAULT 0 COMMENT 'prompt token count',
+                completion_tokens INT NOT NULL DEFAULT 0 COMMENT 'completion token count',
+                total_tokens INT NOT NULL DEFAULT 0 COMMENT 'total token count',
                 status VARCHAR(32) NOT NULL COMMENT 'call status',
                 error_message VARCHAR(1000) NULL COMMENT 'error message',
                 duration_millis BIGINT NOT NULL COMMENT 'call duration in milliseconds',
@@ -46,8 +49,9 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
     private static final String INSERT_SQL = """
             INSERT INTO agent_call_log (
                 call_id, session_id, agent_type, prompt_code, prompt_version, model_name,
-                request_payload, response_text, status, error_message, duration_millis, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                request_payload, response_text, prompt_tokens, completion_tokens, total_tokens,
+                status, error_message, duration_millis, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """;
 
     private final LearningPersistenceProperties properties;
@@ -61,6 +65,21 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement(CREATE_TABLE_SQL)) {
             statement.executeUpdate();
+            ensureColumn(
+                    connection,
+                    "prompt_tokens",
+                    "ALTER TABLE agent_call_log ADD COLUMN prompt_tokens INT NOT NULL DEFAULT 0 COMMENT 'prompt token count' AFTER response_text"
+            );
+            ensureColumn(
+                    connection,
+                    "completion_tokens",
+                    "ALTER TABLE agent_call_log ADD COLUMN completion_tokens INT NOT NULL DEFAULT 0 COMMENT 'completion token count' AFTER prompt_tokens"
+            );
+            ensureColumn(
+                    connection,
+                    "total_tokens",
+                    "ALTER TABLE agent_call_log ADD COLUMN total_tokens INT NOT NULL DEFAULT 0 COMMENT 'total token count' AFTER completion_tokens"
+            );
         } catch (SQLException exception) {
             throw new IllegalStateException("Failed to initialize agent_call_log table", exception);
         }
@@ -78,10 +97,13 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
             statement.setString(6, log.modelName());
             statement.setString(7, log.requestPayload());
             statement.setString(8, log.responseText());
-            statement.setString(9, log.status().name());
-            statement.setString(10, log.errorMessage());
-            statement.setLong(11, log.durationMillis());
-            statement.setTimestamp(12, Timestamp.from(log.createdAt()));
+            statement.setInt(9, log.promptTokens());
+            statement.setInt(10, log.completionTokens());
+            statement.setInt(11, log.totalTokens());
+            statement.setString(12, log.status().name());
+            statement.setString(13, log.errorMessage());
+            statement.setLong(14, log.durationMillis());
+            statement.setTimestamp(15, Timestamp.from(log.createdAt()));
             statement.executeUpdate();
             return log;
         } catch (SQLException exception) {
@@ -163,11 +185,26 @@ public class MySqlAgentCallLogRepository implements AgentCallLogRepository {
                 resultSet.getString("model_name"),
                 resultSet.getString("request_payload"),
                 resultSet.getString("response_text"),
+                resultSet.getInt("prompt_tokens"),
+                resultSet.getInt("completion_tokens"),
+                resultSet.getInt("total_tokens"),
                 AgentCallStatus.valueOf(resultSet.getString("status")),
                 resultSet.getString("error_message"),
                 resultSet.getLong("duration_millis"),
                 resultSet.getTimestamp("created_at").toInstant()
         );
+    }
+
+    private void ensureColumn(Connection connection, String columnName, String alterSql) throws SQLException {
+        try (ResultSet columns = connection.getMetaData()
+                .getColumns(connection.getCatalog(), null, "agent_call_log", columnName)) {
+            if (columns.next()) {
+                return;
+            }
+        }
+        try (PreparedStatement statement = connection.prepareStatement(alterSql)) {
+            statement.executeUpdate();
+        }
     }
 
     private Connection openConnection() throws SQLException {

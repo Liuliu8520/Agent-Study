@@ -1,140 +1,152 @@
 # Backend
 
-Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。
+Agent_Study 后端服务，基于 Spring Boot 3 + Java 17。后端负责学习会话编排、Agent 调用、Prompt 模板、RAG 知识库、后台鉴权、操作审计、统计接口和持久化。
 
-## 当前状态
+## 模块说明
 
-已完成学生端 P0 学习闭环：
+- `learn`：学习会话、LearningState、诊断、学习计划、讲义、练习、复习结果。
+- `agent`：PromptService、LLM Client、AgentRuntimeService、AgentCallLog、LLM 错误分类。
+- `rag`：知识切片、Embedding 生成、向量检索、后台知识库管理。
+- `admin`：后台登录、JWT 鉴权、操作审计、Prompt 版本管理。
+- `statistics`：学习会话、薄弱点、Agent 调用耗时等统计。
+- `security`：Spring Security 配置和 JWT 过滤器。
+- `common`：统一响应、业务异常、全局异常处理。
 
-- `GET /api/health` 健康检查
-- `GET /v3/api-docs/agent-study` OpenAPI 文档 JSON
-- `GET /swagger-ui.html` Swagger UI 页面
-- `POST /api/admin/auth/login` 后台管理员登录并获取 JWT
-- `GET /api/admin/me` 查询当前后台管理员，需要 Bearer Token
-- `GET /api/admin/operation-logs` 查询后台操作审计日志
-- `GET /api/admin/prompts/{code}/versions` 查询 Prompt 模板版本历史
-- `POST /api/admin/prompts/{code}/versions/{versionId}/activate` 激活指定 Prompt 历史版本
-- `POST /api/admin/rag/chunks` 后台新增知识切片并生成 embedding
-- `PUT /api/admin/rag/chunks/{chunkId}` 后台更新知识切片并重新生成 embedding
-- `DELETE /api/admin/rag/chunks/{chunkId}` 后台软删除知识切片
-- `POST /api/admin/rag/chunks/{chunkId}/embedding` 后台重新生成知识切片 embedding
-- `POST /api/learn/sessions` 创建学习会话
-- `GET /api/learn/sessions` 查询学习会话列表，支持 `studentName`、`status`、`limit`
-- `GET /api/learn/sessions/{sessionId}` 查询学习会话
-- `POST /api/learn/sessions/{sessionId}/diagnosis/questions` Step 1 生成诊断题
-- `POST /api/learn/sessions/{sessionId}/diagnosis/submit` Step 1 提交诊断答案
-- `POST /api/learn/sessions/{sessionId}/plan` Step 2 生成 3 天学习计划
-- `POST /api/learn/sessions/{sessionId}/lesson` Step 3 生成 RAG 微讲义
-- `POST /api/learn/sessions/{sessionId}/exercises` Step 4 生成练习题
-- `POST /api/learn/sessions/{sessionId}/exercises/submit` Step 4 表达式自动判卷
-- `GET /api/learn/sessions/{sessionId}/exercise-attempts` 查询练习提交记录
-- `POST /api/learn/sessions/{sessionId}/review` Step 5 生成智能复习或结业结果
-- `GET /api/agent/prompts` 查询默认 Prompt 模板
-- `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板，需要后台管理员 Bearer Token
-- `POST /api/agent/mock-chat` 调用 Mock LLM Client
-- `GET /api/agent/call-logs` 查询 Agent 调用日志，支持 `sessionId`、`agentType`、`status`、`promptCode`、`limit`
-- `GET /api/rag/chunks` 查询 RAG 知识切片
-- `POST /api/rag/retrieve` 基于本地 Hash Embedding 向量相似度和关键词加权检索知识切片
-- `GET /api/statistics/dashboard` 查询学习会话、薄弱点和 Agent 调用统计
+## 运行模式
 
-持久化状态：
+默认 profile 使用内存仓库，适合快速启动和测试。
 
-- 默认 profile 使用 `InMemoryLearningSessionRepository`，方便本地测试和快速启动。
-- `dev` profile 使用 `MySqlRedisLearningSessionRepository`，MySQL 保存 `LearningState` 快照，Redis 缓存热点会话。
-- `dev` profile 使用 MySQL 保存 `exercise_attempt`，默认 profile 使用内存练习提交记录仓库。
-- `dev` profile 使用 MySQL 保存 `AgentCallLog`，默认 profile 使用内存日志仓库。
-- `dev` profile 使用 MySQL 保存 `prompt_template`，默认 profile 使用内存 Prompt 模板仓库。
-- `dev` profile 使用 MySQL 保存 `prompt_template_version`，默认 profile 使用内存 Prompt 版本仓库。
-- `dev` profile 使用 MySQL 保存 `knowledge_chunk` 和 `embedding_json`，表为空时自动写入默认高数切片。
-- `dev` profile 使用 MySQL 保存 `operation_log`，默认 profile 使用内存审计日志仓库。
-- 默认使用 `MockLlmClient`，可通过配置切换到 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback。
-- Step 1 诊断结果分析会调用 `diagnosis.default` Mock Agent，并写入 Agent 调用日志。
-- Step 2 学习计划生成会调用 `planner.three-day` Mock Agent，并写入 Agent 调用日志。
-- Step 3 RAG 微讲义生成会调用 `lesson.micro` Mock Agent，并写入 Agent 调用日志。
-- Step 4 练习题生成会调用 `exercise.generate` Mock Agent，并写入 Agent 调用日志。
-- Step 5 智能复习生成会调用 `review.feedback` Mock Agent，并写入 Agent 调用日志。
-- MySQL 表结构见 `src/main/resources/db/schema-mysql.sql`，dev 仓库启动时会自动建表。
+`dev` profile 使用 MySQL/Redis：
 
-## 运行测试
+- MySQL 保存 `LearningState`、练习提交、Agent 调用日志、Prompt 模板、Prompt 版本、知识切片、操作审计。
+- Redis 缓存热点学习会话。
+- 启动时会自动执行 `src/main/resources/db/schema-mysql.sql` 建表。
+- `knowledge_chunk` 表为空时会写入默认高数知识切片。
+
+## 启动
+
+### 内存模式
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" test
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run
 ```
 
-## 默认内存模式启动
-
-不依赖 MySQL/Redis：
+### MySQL/Redis 模式
 
 ```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
+docker compose -f .\docker\docker-compose.yml up -d
+
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
-健康检查：
+使用本机已有 MySQL/Redis 时，可在启动前覆盖：
+
+```powershell
+$env:AGENT_STUDY_MYSQL_URL="jdbc:mysql://localhost:3306/agent_study?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
+$env:AGENT_STUDY_MYSQL_USERNAME="root"
+$env:AGENT_STUDY_MYSQL_PASSWORD="<你的 MySQL 密码>"
+$env:AGENT_STUDY_REDIS_HOST="localhost"
+$env:AGENT_STUDY_REDIS_PORT="6379"
+$env:AGENT_STUDY_REDIS_DATABASE="0"
+```
+
+## LLM 配置
+
+默认使用 Mock LLM：
 
 ```text
-GET http://localhost:8080/api/health
+AGENT_STUDY_LLM_PROVIDER=mock
 ```
 
-接口文档：
+接入 GLM 或其他 OpenAI-compatible Chat Completions 服务：
+
+```powershell
+$env:AGENT_STUDY_LLM_PROVIDER="openai-compatible"
+$env:AGENT_STUDY_LLM_BASE_URL="https://open.bigmodel.cn/api/paas/v4/chat/completions"
+$env:AGENT_STUDY_LLM_API_KEY="<你的 API Key>"
+$env:AGENT_STUDY_LLM_MODEL="glm-4-flash-250414"
+$env:AGENT_STUDY_LLM_TEMPERATURE="0.2"
+$env:AGENT_STUDY_LLM_MAX_TOKENS="1024"
+$env:AGENT_STUDY_LLM_TIMEOUT_SECONDS="60"
+$env:AGENT_STUDY_LLM_FALLBACK_TO_MOCK="false"
+```
+
+说明：
+
+- `AGENT_STUDY_LLM_BASE_URL` 是完整的 Chat Completions 地址，后端不会自动拼接路径。
+- `AGENT_STUDY_LLM_FALLBACK_TO_MOCK=false` 适合联调真实模型，可以让错误直接暴露出来。
+- 如果修改环境变量，需要重启后端进程。
+- `POST /api/agent/mock-chat` 是历史调试接口名，实际会根据 `AGENT_STUDY_LLM_PROVIDER` 调用 Mock 或真实 LLM。
+- 真实 LLM 调用失败时会返回 `errorType`，例如 `LLM_CONFIGURATION`、`LLM_AUTHENTICATION`、`LLM_MODEL`、`LLM_TIMEOUT`。
+
+## 管理员配置
+
+```text
+AGENT_STUDY_ADMIN_USERNAME=admin
+AGENT_STUDY_ADMIN_PASSWORD=agentstudy
+AGENT_STUDY_ADMIN_JWT_SECRET=agent-study-local-development-secret-change-me
+AGENT_STUDY_ADMIN_TOKEN_TTL_MINUTES=120
+```
+
+本地默认值仅用于开发。生产环境需要设置更强的管理员密码和 JWT 密钥。
+
+## 常用接口
+
+```text
+GET  /api/health
+POST /api/learn/sessions
+GET  /api/learn/sessions
+GET  /api/learn/sessions/{sessionId}
+POST /api/learn/sessions/{sessionId}/diagnosis/questions
+POST /api/learn/sessions/{sessionId}/diagnosis/submit
+POST /api/learn/sessions/{sessionId}/plan
+POST /api/learn/sessions/{sessionId}/lesson
+POST /api/learn/sessions/{sessionId}/exercises
+POST /api/learn/sessions/{sessionId}/exercises/submit
+POST /api/learn/sessions/{sessionId}/review
+POST /api/admin/auth/login
+GET  /api/agent/call-logs
+GET  /api/rag/chunks
+POST /api/rag/retrieve
+GET  /api/statistics/dashboard
+```
+
+完整接口以 OpenAPI 为准：
 
 ```text
 http://localhost:8080/swagger-ui.html
 http://localhost:8080/v3/api-docs/agent-study
 ```
 
-## MySQL/Redis 模式启动
+## 测试和打包
 
-先启动本地基础设施：
-
-```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
-docker compose -f .\docker\docker-compose.yml up -d
-```
-
-再启用 `dev` profile：
+运行测试：
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run "-Dspring-boot.run.profiles=dev"
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" test
 ```
 
-默认连接信息：
-
-- MySQL: `localhost:3306/agent_study`
-- MySQL 用户名: `root`
-- MySQL 密码: `agentstudy`
-- Redis: `localhost:6379`
-
-可通过环境变量覆盖：
-
-- `AGENT_STUDY_MYSQL_URL`
-- `AGENT_STUDY_MYSQL_USERNAME`
-- `AGENT_STUDY_MYSQL_PASSWORD`
-- `AGENT_STUDY_REDIS_HOST`
-- `AGENT_STUDY_REDIS_PORT`
-- `AGENT_STUDY_REDIS_DATABASE`
-
-LLM 可通过环境变量切换：
-
-- `AGENT_STUDY_LLM_PROVIDER`: 默认 `mock`，可设为 `openai-compatible`
-- `AGENT_STUDY_LLM_BASE_URL`: Chat Completions 兼容接口地址
-- `AGENT_STUDY_LLM_API_KEY`: 大模型 API Key
-- `AGENT_STUDY_LLM_MODEL`: 模型名，默认 `glm-4-flash`
-- `AGENT_STUDY_LLM_FALLBACK_TO_MOCK`: 真实调用配置缺失或失败时是否回退 Mock，默认 `true`
-
-后台管理员可通过环境变量覆盖：
-
-- `AGENT_STUDY_ADMIN_USERNAME`: 默认 `admin`
-- `AGENT_STUDY_ADMIN_PASSWORD`: 默认 `agentstudy`
-- `AGENT_STUDY_ADMIN_JWT_SECRET`: JWT 签名密钥，本地默认值仅用于开发
-- `AGENT_STUDY_ADMIN_TOKEN_TTL_MINUTES`: Token 有效期，默认 120 分钟
-
-## 打包运行
+打包：
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" package
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" package
+```
+
+运行 Jar：
+
+```powershell
 java -jar .\target\agent-study-backend-0.1.0-SNAPSHOT.jar
 ```
+
+## 常见问题
+
+- `Port 8080 was already in use`：已有后端进程占用端口，停止旧进程后重新启动。
+- 真实 LLM 仍返回 Mock：确认 `AGENT_STUDY_LLM_PROVIDER=openai-compatible`，并在设置环境变量后重启后端。
+- GLM 返回 401/403：检查 API Key 是否正确、是否有权限、是否复制了多余空格。
+- GLM 返回 400：检查模型名是否是当前账号可用的模型 ID。
+- GLM 返回 404：检查 `AGENT_STUDY_LLM_BASE_URL` 是否完整包含 `/chat/completions`。

@@ -117,6 +117,9 @@ class AgentControllerTests {
         assertThat(callId).isNotBlank();
         assertThat(data.path("agentType").asText()).isEqualTo("LESSON_GENERATOR");
         assertThat(data.path("modelName").asText()).isEqualTo("mock-llm-v1");
+        assertThat(data.path("promptTokens").asInt()).isGreaterThan(0);
+        assertThat(data.path("completionTokens").asInt()).isGreaterThan(0);
+        assertThat(data.path("totalTokens").asInt()).isGreaterThan(0);
         assertThat(data.path("outputText").asText()).contains("Mock讲义");
 
         ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
@@ -129,6 +132,8 @@ class AgentControllerTests {
         JsonNode log = logResponse.getBody().path("data");
         assertThat(log.path("callId").asText()).isEqualTo(callId);
         assertThat(log.path("status").asText()).isEqualTo("SUCCESS");
+        assertThat(log.path("modelName").asText()).isEqualTo("mock-llm-v1");
+        assertThat(log.path("totalTokens").asInt()).isEqualTo(data.path("totalTokens").asInt());
         assertThat(log.path("requestPayload").asText()).contains("3 天链式法则补强计划");
     }
 

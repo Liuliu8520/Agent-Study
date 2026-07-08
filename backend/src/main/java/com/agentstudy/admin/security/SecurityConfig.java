@@ -38,7 +38,9 @@ public class SecurityConfig {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                     response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.fail("Admin authentication is required")));
+                    response.getWriter().write(objectMapper.writeValueAsString(
+                            ApiResponse.fail("Admin authentication is required", "AUTHENTICATION_ERROR")
+                    ));
                 }))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(

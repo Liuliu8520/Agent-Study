@@ -297,14 +297,28 @@
           <div class="table-wrap">
             <table>
               <thead>
-                <tr><th>时间</th><th>Agent</th><th>Prompt</th><th>状态</th><th>耗时</th></tr>
+                <tr>
+                  <th>时间</th>
+                  <th>Agent</th>
+                  <th>Prompt</th>
+                  <th>模型</th>
+                  <th>Token</th>
+                  <th>状态</th>
+                  <th>失败原因</th>
+                  <th>耗时</th>
+                </tr>
               </thead>
               <tbody>
                 <tr v-for="log in agentLogs" :key="log.callId">
                   <td>{{ formatTime(log.createdAt) }}</td>
                   <td>{{ log.agentType }}</td>
                   <td>{{ log.promptCode }} / {{ log.promptVersion }}</td>
-                  <td>{{ log.status }}</td>
+                  <td class="model-cell">{{ log.modelName || '-' }}</td>
+                  <td class="token-cell">{{ formatTokens(log) }}</td>
+                  <td>
+                    <span class="status-pill" :class="statusClass(log.status)">{{ log.status }}</span>
+                  </td>
+                  <td class="error-cell">{{ log.errorMessage || '-' }}</td>
                   <td>{{ log.durationMillis }} ms</td>
                 </tr>
               </tbody>
@@ -572,5 +586,15 @@ function formatTime(value) {
 
 function formatMillis(value) {
   return `${Math.round(Number(value || 0))} ms`
+}
+
+function formatTokens(log) {
+  const total = Number(log.totalTokens || 0)
+  if (!total) return '-'
+  return `${total}（${Number(log.promptTokens || 0)} + ${Number(log.completionTokens || 0)}）`
+}
+
+function statusClass(status) {
+  return status === 'SUCCESS' ? 'success' : 'failed'
 }
 </script>

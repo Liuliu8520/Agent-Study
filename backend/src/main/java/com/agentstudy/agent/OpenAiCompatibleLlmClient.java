@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpTimeoutException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -14,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -39,7 +41,12 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
     @Override
     public LlmResponse complete(LlmRequest request) {
         if (!hasRequiredConfig()) {
-            return fallbackOrThrow(request, "LLM base-url or api-key is not configured");
+            return fallbackOrThrow(
+                    request,
+                    LlmErrorType.LLM_CONFIGURATION,
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "LLM base-url or api-key is not configured"
+            );
         }
 
         try {
@@ -48,16 +55,57 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
                     HttpResponse.BodyHandlers.ofString()
             );
             if (response.statusCode() >= 400) {
-                return fallbackOrThrow(request, "LLM request failed with HTTP " + response.statusCode());
+                return fallbackOrThrow(
+                        request,
+                        classifyHttpError(response.statusCode(), response.body()),
+                        statusForHttpError(response.statusCode()),
+                        buildHttpErrorMessage(response.statusCode(), response.body())
+                );
             }
             return parseResponse(response.body());
+        } catch (LlmException exception) {
+            return fallbackOrThrow(
+                    request,
+                    exception.getErrorType(),
+                    exception.getStatus(),
+                    exception.getMessage()
+            );
+        } catch (HttpTimeoutException exception) {
+            return fallbackOrThrow(
+                    request,
+                    LlmErrorType.LLM_TIMEOUT,
+                    HttpStatus.GATEWAY_TIMEOUT,
+                    "LLM request timed out"
+            );
         } catch (IOException exception) {
-            return fallbackOrThrow(request, "LLM request failed: " + exception.getMessage());
+            return fallbackOrThrow(
+                    request,
+                    LlmErrorType.LLM_NETWORK,
+                    HttpStatus.BAD_GATEWAY,
+                    "LLM network request failed: " + exception.getMessage()
+            );
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return fallbackOrThrow(request, "LLM request was interrupted");
+            return fallbackOrThrow(
+                    request,
+                    LlmErrorType.LLM_TIMEOUT,
+                    HttpStatus.GATEWAY_TIMEOUT,
+                    "LLM request was interrupted"
+            );
+        } catch (IllegalArgumentException exception) {
+            return fallbackOrThrow(
+                    request,
+                    LlmErrorType.LLM_ENDPOINT,
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "LLM base-url is invalid: " + exception.getMessage()
+            );
         } catch (RuntimeException exception) {
-            return fallbackOrThrow(request, "LLM response handling failed: " + exception.getMessage());
+            return fallbackOrThrow(
+                    request,
+                    LlmErrorType.LLM_RESPONSE_FORMAT,
+                    HttpStatus.BAD_GATEWAY,
+                    "LLM response handling failed: " + exception.getMessage()
+            );
         }
     }
 
@@ -93,11 +141,24 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
         return messages;
     }
 
-    private LlmResponse parseResponse(String body) throws JsonProcessingException {
-        JsonNode root = objectMapper.readTree(body);
+    private LlmResponse parseResponse(String body) {
+        JsonNode root;
+        try {
+            root = objectMapper.readTree(body);
+        } catch (JsonProcessingException exception) {
+            throw new LlmException(
+                    LlmErrorType.LLM_RESPONSE_FORMAT,
+                    HttpStatus.BAD_GATEWAY,
+                    "LLM response is not valid JSON"
+            );
+        }
         String content = root.path("choices").path(0).path("message").path("content").asText();
         if (!StringUtils.hasText(content)) {
-            throw new IllegalStateException("LLM response content is empty");
+            throw new LlmException(
+                    LlmErrorType.LLM_RESPONSE_FORMAT,
+                    HttpStatus.BAD_GATEWAY,
+                    "LLM response content is empty"
+            );
         }
         JsonNode usage = root.path("usage");
         return new LlmResponse(
@@ -108,10 +169,72 @@ public class OpenAiCompatibleLlmClient implements LlmClient {
         );
     }
 
-    private LlmResponse fallbackOrThrow(LlmRequest request, String reason) {
+    private LlmResponse fallbackOrThrow(LlmRequest request, LlmErrorType errorType, HttpStatus status, String reason) {
         if (properties.isFallbackToMock()) {
             return MockLlmClient.completeMock(request);
         }
-        throw new IllegalStateException(reason);
+        throw new LlmException(errorType, status, reason);
+    }
+
+    private LlmErrorType classifyHttpError(int statusCode, String body) {
+        String lowerBody = body == null ? "" : body.toLowerCase();
+        if (statusCode == 401 || statusCode == 403) {
+            return LlmErrorType.LLM_AUTHENTICATION;
+        }
+        if (statusCode == 404) {
+            return LlmErrorType.LLM_ENDPOINT;
+        }
+        if (statusCode == 429) {
+            return LlmErrorType.LLM_RATE_LIMIT;
+        }
+        if (lowerBody.contains("model")) {
+            return LlmErrorType.LLM_MODEL;
+        }
+        return LlmErrorType.LLM_UPSTREAM;
+    }
+
+    private HttpStatus statusForHttpError(int statusCode) {
+        if (statusCode == 429) {
+            return HttpStatus.TOO_MANY_REQUESTS;
+        }
+        if (statusCode >= 500) {
+            return HttpStatus.BAD_GATEWAY;
+        }
+        return HttpStatus.BAD_GATEWAY;
+    }
+
+    private String buildHttpErrorMessage(int statusCode, String body) {
+        String upstreamMessage = extractUpstreamMessage(body);
+        if (StringUtils.hasText(upstreamMessage)) {
+            return "LLM request failed with HTTP " + statusCode + ": " + upstreamMessage;
+        }
+        return "LLM request failed with HTTP " + statusCode;
+    }
+
+    private String extractUpstreamMessage(String body) {
+        if (!StringUtils.hasText(body)) {
+            return "";
+        }
+        try {
+            JsonNode root = objectMapper.readTree(body);
+            String message = root.path("error").path("message").asText();
+            if (!StringUtils.hasText(message)) {
+                message = root.path("message").asText();
+            }
+            if (!StringUtils.hasText(message)) {
+                message = root.path("msg").asText();
+            }
+            return trimMessage(message);
+        } catch (JsonProcessingException exception) {
+            return trimMessage(body);
+        }
+    }
+
+    private String trimMessage(String message) {
+        if (!StringUtils.hasText(message)) {
+            return "";
+        }
+        String normalized = message.replaceAll("\\s+", " ").trim();
+        return normalized.length() > 500 ? normalized.substring(0, 500) + "..." : normalized;
     }
 }

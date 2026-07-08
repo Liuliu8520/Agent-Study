@@ -12,6 +12,9 @@ public record AgentRunResponse(
         String promptVersion,
         String modelName,
         String outputText,
+        int promptTokens,
+        int completionTokens,
+        int totalTokens,
         long durationMillis,
         Instant createdAt
 ) {
@@ -25,6 +28,9 @@ public record AgentRunResponse(
                 result.promptVersion(),
                 result.modelName(),
                 result.outputText(),
+                result.promptTokens(),
+                result.completionTokens(),
+                result.totalTokens(),
                 result.durationMillis(),
                 result.createdAt()
         );

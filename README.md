@@ -1,76 +1,115 @@
 # Agent_Study
 
-基于大模型的个性化高数学习多智能体系统。
+基于大模型的个性化高数学习多智能体系统。项目提供学生端学习闭环、后台管理台、Prompt 管理、RAG 知识库、Agent 调用日志、MySQL/Redis 持久化和可切换的真实 LLM 调用。
 
-项目定位：面向 Java 后端 / Agent 工程方向实习简历的完整作品，优先做出可运行、可演示、可讲清楚技术取舍的学生端学习闭环。
+## 功能概览
+
+- 学生端学习闭环：创建学习会话、诊断题、薄弱点识别、3 天学习计划、RAG 微讲义、练习题生成、表达式自动判卷、智能复习或结业结果。
+- 多智能体编排：诊断 Agent、规划 Agent、讲义 Agent、练习 Agent、复习 Agent 通过统一 `AgentRuntimeService` 执行。
+- LLM 调用：默认使用 `MockLlmClient`，可通过环境变量切换到 OpenAI-compatible 接口，例如 GLM Chat Completions。
+- RAG 知识库：支持知识切片持久化、后台维护、Hash Embedding 向量检索和关键词加权检索。
+- 后台管理：JWT 登录、Prompt 模板编辑、Prompt 版本启用、知识库管理、操作审计、Agent 调用日志、学习统计。
+- 可观测性：Agent 日志记录模型名、Token 消耗、耗时、状态和失败原因；LLM 调用失败会返回分类错误。
+- 持久化：默认内存模式可快速启动；`dev` profile 使用 MySQL 保存业务数据，并使用 Redis 缓存热点学习会话。
+
+## 技术栈
+
+- 后端：Java 17、Spring Boot 3.3、Spring Web、Spring Security、Spring Validation、Spring Data Redis、MySQL、Springdoc OpenAPI、exp4j。
+- 前端：Vue 3、Vite、Vue Router、Pinia、Markdown-it、KaTeX。
+- 基础设施：Docker Compose、MySQL 8、Redis 7。
 
 ## 项目结构
 
 ```text
 Agent_Study/
-├── backend/   Spring Boot 后端
-├── frontend/  Vue3 学生端与后台管理端
-├── docker/    MySQL、Redis 本地开发环境
-├── docs/      API、数据库、Prompt 文档
-└── Agent.md   开发协作说明
+├── backend/                 Spring Boot 后端服务
+├── frontend/                Vue 3 学生端和后台管理端
+├── docker/                  MySQL、Redis 本地开发环境
+├── docs/                    API、数据库、Prompt、RAG 等补充文档
+├── Agent.md                 Codex/Agent 协作说明
+└── README.md                项目总览和启动说明
 ```
 
-## 已完成能力
+## 快速启动
 
-- 后端 Spring Boot 基础骨架
-- 统一响应、业务异常、全局异常处理
-- OpenAPI/Swagger UI 接口文档
-- Spring Security + JWT 后台鉴权
-- 学习会话创建与查询
-- 学习会话列表查询，支持学生名、状态和 limit 筛选
-- Step 1 诊断题生成与弱点识别
-- Step 2 根据弱点生成 3 天学习计划
-- Step 3 RAG 微讲义生成入口
-- Step 4 练习题生成与表达式自动判卷
-- `exercise_attempt` 持久化练习提交记录和判卷明细
-- Step 5 智能复习或结业结果生成
-- MySQL 持久化 `LearningState` 快照
-- Redis 缓存热点学习会话
-- `PromptService` 内置 5 类 Agent Prompt 模板
-- `prompt_template` 支撑 Prompt 模板持久化和在线更新，写接口已接入后台 JWT 鉴权
-- `prompt_template_version` 支撑 Prompt 模板版本历史和回滚启用
-- `MockLlmClient` 支撑无 API Key 的 Agent 调用演示
-- 可配置 OpenAI-compatible 真实 LLM Client，并保留 Mock fallback
-- `AgentCallLog` 记录 Prompt、模型输出、状态和耗时
-- Agent 调用日志支持按会话、Agent 类型、状态和 Prompt 编码筛选
-- `knowledge_chunk` 支撑 RAG 知识切片持久化、后台管理和向量检索
-- `operation_log` 记录 Prompt 和知识库后台操作审计
-- `statistics` 模块提供学习会话、薄弱点和 Agent 调用统计
-- Step 1 诊断结果分析已接入 `diagnosis.default` Agent 调用日志
-- Step 2 学习计划生成已接入 `planner.three-day` Agent 调用日志
-- Step 3 RAG 微讲义生成已接入 `lesson.micro` Agent 调用日志
-- Step 4 练习题生成已接入 `exercise.generate` Agent 调用日志
-- Step 5 智能复习生成已接入 `review.feedback` Agent 调用日志
-- Vue3 前端学生端支持步骤条式学习流程、多智能体工作台日志、Markdown/KaTeX 微讲义渲染和数学表达式快捷输入
-- Vue3 后台端支持 Prompt 管理、版本启用、RAG 知识库维护、操作审计、Agent 调用日志和统计洞察
+### 1. 启动后端：内存模式
 
-## 后端运行
-
-默认内存模式，不需要数据库：
+内存模式不依赖 MySQL/Redis，适合快速查看接口和页面流程。
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run
 ```
 
-MySQL/Redis 模式：
+### 2. 启动后端：MySQL/Redis 模式
+
+如果使用项目自带 Docker 环境：
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
 docker compose -f .\docker\docker-compose.yml up -d
 
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-$env:AGENT_STUDY_MYSQL_USERNAME="root"
-$env:AGENT_STUDY_MYSQL_PASSWORD="<你的 MySQL 密码>"
 & "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
-健康检查：
+Docker 默认连接信息：
+
+```text
+MySQL: localhost:3306/agent_study
+MySQL 用户名: root
+MySQL 密码: agentstudy
+Redis: localhost:6379
+```
+
+如果使用本机已有 MySQL，可以在启动后端前覆盖环境变量：
+
+```powershell
+$env:AGENT_STUDY_MYSQL_USERNAME="root"
+$env:AGENT_STUDY_MYSQL_PASSWORD="<你的本机 MySQL 密码>"
+```
+
+### 3. 可选：启用 GLM 真实 LLM 调用
+
+默认配置会走 Mock LLM。要调用 GLM，需要在启动后端前设置以下环境变量。不要把真实 API Key 写入配置文件或提交到 Git。
+
+```powershell
+$env:AGENT_STUDY_LLM_PROVIDER="openai-compatible"
+$env:AGENT_STUDY_LLM_BASE_URL="https://open.bigmodel.cn/api/paas/v4/chat/completions"
+$env:AGENT_STUDY_LLM_API_KEY="<你的 GLM API Key>"
+$env:AGENT_STUDY_LLM_MODEL="glm-4-flash-250414"
+$env:AGENT_STUDY_LLM_TEMPERATURE="0.2"
+$env:AGENT_STUDY_LLM_MAX_TOKENS="1024"
+$env:AGENT_STUDY_LLM_TIMEOUT_SECONDS="60"
+$env:AGENT_STUDY_LLM_FALLBACK_TO_MOCK="false"
+```
+
+环境变量只会在后端进程启动时读取；如果修改了模型名或 API Key，需要重启 Spring Boot。
+
+### 4. 启动前端
+
+```powershell
+cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\frontend
+npm.cmd install --cache ..\.npm-cache
+npm.cmd run dev
+```
+
+访问地址：
+
+```text
+学生端: http://localhost:5173/student
+后台端: http://localhost:5173/admin
+```
+
+后台默认账号：
+
+```text
+admin / agentstudy
+```
+
+## 验证方式
+
+后端健康检查：
 
 ```text
 GET http://localhost:8080/api/health
@@ -83,30 +122,35 @@ http://localhost:8080/swagger-ui.html
 http://localhost:8080/v3/api-docs/agent-study
 ```
 
-测试：
+后端测试：
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" test
+& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" test
 ```
 
-## 前端运行
+前端构建：
 
 ```powershell
 cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\frontend
-npm.cmd install --cache ..\.npm-cache
-npm.cmd run dev
+npm.cmd run build
 ```
 
-访问：
+## 文档索引
 
-```text
-学生端：http://localhost:5173
-后台端：http://localhost:5173/admin
-```
+- [后端说明](backend/README.md)
+- [前端说明](frontend/README.md)
+- [API 文档](docs/api.md)
+- [后台 API 文档](docs/admin-api.md)
+- [Agent API 文档](docs/agent-api.md)
+- [RAG API 文档](docs/rag-api.md)
+- [统计 API 文档](docs/statistics-api.md)
+- [数据库文档](docs/database.md)
+- [Prompt 模板文档](docs/prompt-templates.md)
 
-后台默认账号：
+## 后续待办
 
-```text
-admin / agentstudy
-```
+- 增加前端自动化测试或关键流程 E2E 测试。
+- 增加 LLM 请求重试、限流退避和失败告警策略。
+- 将本地 Hash Embedding 抽象为可替换接口，后续可接入真实 Embedding 服务。
+- 增加生产部署配置示例，例如 Nginx、Docker 镜像、环境变量清单和数据库初始化步骤。

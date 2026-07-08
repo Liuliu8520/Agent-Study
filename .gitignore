@@ -2,6 +2,10 @@
 target/
 backend/target/
 frontend/dist/
+variables.txt
+.env
+.env.*
+!.env.example
 
 # Local dependency caches and downloaded tools
 .m2/
@@ -18,12 +22,13 @@ frontend/node_modules/
 *.log
 
 # Generated local document previews
-Agent_Study-简历导向需求与开发规划.html
+Agent_Study-*.html
 
 # Local planning documents
 Agent_Study-产品需求文档.md
 Agent_Study-简历导向需求与开发规划.md
 Agent_Study-系统技术架构设计书.md
+DSsuggestion.md
 
 # OS files
 .DS_Store

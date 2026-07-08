@@ -769,6 +769,39 @@ tr:last-child td {
   border-bottom: 0;
 }
 
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-pill.success {
+  color: #125f3d;
+  background: #dff4e9;
+}
+
+.status-pill.failed {
+  color: #8a241b;
+  background: #fde8e6;
+}
+
+.model-cell,
+.token-cell {
+  white-space: nowrap;
+  color: #415068;
+}
+
+.error-cell {
+  max-width: 320px;
+  color: var(--red);
+  word-break: break-word;
+}
+
 .session-row,
 .select-row {
   width: 100%;
