@@ -12,6 +12,16 @@
 - 可观测性：Agent 日志记录模型名、Token 消耗、耗时、状态和失败原因；LLM 调用失败会返回分类错误。
 - 持久化：默认内存模式可快速启动；`dev` profile 使用 MySQL 保存业务数据，并使用 Redis 缓存热点学习会话。
 
+## 功能截图
+- 学生端
+
+  <img width="1763" height="1321" alt="学生端" src="https://github.com/user-attachments/assets/17cfa937-25fd-456b-ad7e-d05e7e385e79" />
+
+- 管理端
+
+  <img width="1763" height="1368" alt="管理端" src="https://github.com/user-attachments/assets/be3c0e8f-c9a6-442e-a063-a8ccbdfd66a0" />
+
+
 ## 技术栈
 
 - 后端：Java 17、Spring Boot 3.3、Spring Web、Spring Security、Spring Validation、Spring Data Redis、MySQL、Springdoc OpenAPI、exp4j。
