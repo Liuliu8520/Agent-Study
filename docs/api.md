@@ -138,11 +138,11 @@ POST /api/learn/sessions/{sessionId}/review
 ## Agent
 
 ```http
-GET /api/agent/prompts
+GET /api/agent/prompts        # 需要管理员 Bearer Token
 PUT /api/agent/prompts/{code}  # 需要管理员 Bearer Token
 POST /api/agent/mock-chat
-GET /api/agent/call-logs?limit=20
-GET /api/agent/call-logs/{callId}
+GET /api/agent/call-logs?limit=20  # 需要管理员 Bearer Token
+GET /api/agent/call-logs/{callId}  # 需要管理员 Bearer Token
 ```
 
 详见 [agent-api.md](agent-api.md)。
@@ -166,9 +166,9 @@ POST /api/admin/rag/chunks/{chunkId}/embedding
 ## RAG
 
 ```http
-GET /api/rag/chunks
-GET /api/rag/chunks/{chunkId}
-POST /api/rag/retrieve
+GET /api/rag/chunks          # 需要管理员 Bearer Token
+GET /api/rag/chunks/{chunkId} # 需要管理员 Bearer Token
+POST /api/rag/retrieve       # 需要管理员 Bearer Token
 ```
 
 详见 [rag-api.md](rag-api.md)。
@@ -176,7 +176,7 @@ POST /api/rag/retrieve
 ## Statistics
 
 ```http
-GET /api/statistics/dashboard
+GET /api/statistics/dashboard # 需要管理员 Bearer Token
 ```
 
 详见 [statistics-api.md](statistics-api.md)。

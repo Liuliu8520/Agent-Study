@@ -10,6 +10,7 @@
 
 ```http
 GET /api/agent/prompts
+Authorization: Bearer jwt-token
 ```
 
 返回当前可用的 Prompt 模板。默认会初始化 5 个内置模板，后续通过接口新增的模板也会出现在列表中。
@@ -85,12 +86,14 @@ Content-Type: application/json
 
 ```http
 GET /api/agent/call-logs?limit=20
+Authorization: Bearer jwt-token
 ```
 
 支持筛选：
 
 ```http
 GET /api/agent/call-logs?sessionId=session-id&agentType=LESSON_GENERATOR&status=SUCCESS&promptCode=lesson.micro&limit=20
+Authorization: Bearer jwt-token
 ```
 
 可选参数：
@@ -105,6 +108,7 @@ GET /api/agent/call-logs?sessionId=session-id&agentType=LESSON_GENERATOR&status=
 
 ```http
 GET /api/agent/call-logs/{callId}
+Authorization: Bearer jwt-token
 ```
 
 返回渲染后的 Prompt、模型输出、状态、错误信息和耗时。

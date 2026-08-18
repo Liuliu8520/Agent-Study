@@ -29,8 +29,10 @@ class AgentControllerTests {
 
     @Test
     void listsDefaultPromptTemplates() {
-        ResponseEntity<JsonNode> response = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
                 "/api/agent/prompts",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
 
@@ -38,6 +40,17 @@ class AgentControllerTests {
         JsonNode data = response.getBody().path("data");
         assertThat(data.size()).isGreaterThanOrEqualTo(5);
         assertThat(data.toString()).contains("lesson.micro");
+    }
+
+    @Test
+    void rejectsPromptTemplateListWithoutAdminToken() {
+        ResponseEntity<JsonNode> response = restTemplate.getForEntity(
+                "/api/agent/prompts",
+                JsonNode.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody().path("message").asText()).contains("Admin authentication is required");
     }
 
     @Test
@@ -84,11 +97,14 @@ class AgentControllerTests {
         assertThat(run.path("promptVersion").asText()).isEqualTo("v2");
         String callId = run.path("callId").asText();
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs/{callId}",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class,
                 callId
         );
+        assertThat(logResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode log = logResponse.getBody().path("data");
         assertThat(log.path("promptVersion").asText()).isEqualTo("v2");
         assertThat(log.path("requestPayload").asText()).contains("Custom lesson system prompt");
@@ -122,8 +138,10 @@ class AgentControllerTests {
         assertThat(data.path("totalTokens").asInt()).isGreaterThan(0);
         assertThat(data.path("outputText").asText()).contains("Mock讲义");
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs/{callId}",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class,
                 callId
         );
@@ -154,8 +172,10 @@ class AgentControllerTests {
         );
         String callId = response.getBody().path("data").path("callId").asText();
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs?sessionId={sessionId}&agentType={agentType}&status={status}&promptCode={promptCode}&limit=5",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class,
                 "session-filtered-log",
                 "LESSON_GENERATOR",

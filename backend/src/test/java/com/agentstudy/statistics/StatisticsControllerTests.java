@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -31,8 +33,10 @@ class StatisticsControllerTests {
                 answer("integral-definite", "A")
         ));
 
-        ResponseEntity<JsonNode> response = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
                 "/api/statistics/dashboard",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
 
@@ -44,6 +48,21 @@ class StatisticsControllerTests {
         assertThat(data.path("agentCalls").path("sampleSize").asInt()).isGreaterThan(0);
         assertThat(data.path("agentCalls").path("successCount").asInt()).isGreaterThan(0);
         assertThat(data.path("agentCalls").path("byAgentType").toString()).contains("DIAGNOSTICIAN");
+    }
+
+    private HttpHeaders adminHeaders() {
+        ResponseEntity<JsonNode> loginResponse = restTemplate.postForEntity(
+                "/api/admin/auth/login",
+                Map.of("username", "admin", "password", "agentstudy"),
+                JsonNode.class
+        );
+
+        assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String token = loginResponse.getBody().path("data").path("accessToken").asText();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 
     private String createSession(String studentName) {

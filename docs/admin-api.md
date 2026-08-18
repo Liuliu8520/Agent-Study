@@ -10,6 +10,7 @@
 
 当前接入后台权限的管理操作：
 
+- `GET /api/agent/prompts` 查询 Prompt 模板列表。
 - `PUT /api/agent/prompts/{code}` 新增或更新 Prompt 模板。
 - `GET /api/admin/prompts/{code}/versions` 查询 Prompt 模板版本历史。
 - `POST /api/admin/prompts/{code}/versions/{versionId}/activate` 激活指定 Prompt 历史版本。
@@ -18,6 +19,8 @@
 - `DELETE /api/admin/rag/chunks/{chunkId}` 软删除知识切片。
 - `POST /api/admin/rag/chunks/{chunkId}/embedding` 重新生成知识切片 embedding。
 - `GET /api/admin/operation-logs` 查询后台操作审计日志。
+
+管理台还会读取 `/api/agent/call-logs`、`/api/rag/**` 和 `/api/statistics/**`，这些接口同样需要管理员 Bearer Token。
 
 ## 管理员登录
 

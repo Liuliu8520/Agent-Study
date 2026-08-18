@@ -1,12 +1,13 @@
 import { request } from './client'
 
 export const ragApi = {
-  listChunks() {
-    return request('/api/rag/chunks')
+  listChunks(token) {
+    return request('/api/rag/chunks', { token })
   },
-  retrieve(keywords, limit = 4) {
+  retrieve(token, keywords, limit = 4) {
     return request('/api/rag/retrieve', {
       method: 'POST',
+      token,
       body: { keywords, limit }
     })
   }

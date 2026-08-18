@@ -1,5 +1,7 @@
 package com.agentstudy.learn.exercise;
 
+import java.util.regex.Pattern;
+
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,8 @@ public class ExpressionJudgeService {
 
     private static final double[] SAMPLE_POINTS = {-2.0, -1.0, -0.5, 0.5, 1.0, 2.0};
     private static final double TOLERANCE = 1e-6;
+    private static final Pattern NATURAL_LOG_ALIAS = Pattern.compile("\\bln\\(");
+    private static final Pattern NATURAL_EXPONENT_ALIAS = Pattern.compile("(?<![A-Za-z0-9_])e\\^x(?![A-Za-z0-9_])");
 
     public ExerciseJudgeResult judge(ExerciseQuestion question, String studentAnswer) {
         String normalizedAnswer = normalize(studentAnswer);
@@ -23,7 +27,7 @@ public class ExpressionJudgeService {
         }
 
         try {
-            Expression standardExpression = buildExpression(question.standardAnswer());
+            Expression standardExpression = buildExpression(normalize(question.standardAnswer()));
             Expression studentExpression = buildExpression(normalizedAnswer);
 
             for (double x : SAMPLE_POINTS) {
@@ -66,7 +70,12 @@ public class ExpressionJudgeService {
     }
 
     private String normalize(String expression) {
-        return expression == null ? "" : expression.replace(" ", "").trim();
+        if (expression == null) {
+            return "";
+        }
+
+        String normalized = expression.replace(" ", "").trim();
+        normalized = NATURAL_LOG_ALIAS.matcher(normalized).replaceAll("log(");
+        return NATURAL_EXPONENT_ALIAS.matcher(normalized).replaceAll("exp(x)");
     }
 }
-

@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -20,8 +23,10 @@ class RagControllerTests {
 
     @Test
     void listsKnowledgeChunks() {
-        ResponseEntity<JsonNode> response = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
                 "/api/rag/chunks",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
 
@@ -32,9 +37,21 @@ class RagControllerTests {
     }
 
     @Test
-    void getsKnowledgeChunkById() {
+    void rejectsKnowledgeChunkListWithoutAdminToken() {
         ResponseEntity<JsonNode> response = restTemplate.getForEntity(
+                "/api/rag/chunks",
+                JsonNode.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getsKnowledgeChunkById() {
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
                 "/api/rag/chunks/{chunkId}",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class,
                 "chunk-chain-rule"
         );
@@ -47,9 +64,10 @@ class RagControllerTests {
 
     @Test
     void retrievesKnowledgeChunksByKeywords() {
-        ResponseEntity<JsonNode> response = restTemplate.postForEntity(
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
                 "/api/rag/retrieve",
-                Map.of("keywords", List.of("chain_rule"), "limit", 2),
+                HttpMethod.POST,
+                new HttpEntity<>(Map.of("keywords", List.of("chain_rule"), "limit", 2), adminHeaders()),
                 JsonNode.class
         );
 
@@ -58,5 +76,20 @@ class RagControllerTests {
         assertThat(data.size()).isGreaterThanOrEqualTo(1);
         assertThat(data.get(0).path("id").asText()).isEqualTo("chunk-chain-rule");
         assertThat(data.get(0).path("score").asDouble()).isGreaterThan(0);
+    }
+
+    private HttpHeaders adminHeaders() {
+        ResponseEntity<JsonNode> loginResponse = restTemplate.postForEntity(
+                "/api/admin/auth/login",
+                Map.of("username", "admin", "password", "agentstudy"),
+                JsonNode.class
+        );
+
+        assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String token = loginResponse.getBody().path("data").path("accessToken").asText();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 }

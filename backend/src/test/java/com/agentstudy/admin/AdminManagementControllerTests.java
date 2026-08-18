@@ -94,9 +94,10 @@ class AdminManagementControllerTests {
         assertThat(created.path("embeddingReady").asBoolean()).isTrue();
         assertThat(created.path("embeddingDimensions").asInt()).isGreaterThan(0);
 
-        ResponseEntity<JsonNode> retrieveResponse = restTemplate.postForEntity(
+        ResponseEntity<JsonNode> retrieveResponse = restTemplate.exchange(
                 "/api/rag/retrieve",
-                Map.of("keywords", List.of("admin_vector_test"), "limit", 1),
+                HttpMethod.POST,
+                new HttpEntity<>(Map.of("keywords", List.of("admin_vector_test"), "limit", 1), adminHeaders()),
                 JsonNode.class
         );
 
@@ -124,8 +125,10 @@ class AdminManagementControllerTests {
 
         assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<JsonNode> deletedGetResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> deletedGetResponse = restTemplate.exchange(
                 "/api/rag/chunks/{chunkId}",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class,
                 chunkId
         );

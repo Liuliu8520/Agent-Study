@@ -6,10 +6,13 @@
 /api/rag
 ```
 
+全部读写接口都需要管理员 Bearer Token。
+
 ## 查询知识切片
 
 ```http
 GET /api/rag/chunks
+Authorization: Bearer jwt-token
 ```
 
 返回当前可用的知识切片列表。
@@ -18,18 +21,21 @@ GET /api/rag/chunks
 
 ```http
 GET /api/rag/chunks/{chunkId}
+Authorization: Bearer jwt-token
 ```
 
 示例：
 
 ```http
 GET /api/rag/chunks/chunk-chain-rule
+Authorization: Bearer jwt-token
 ```
 
 ## 向量检索
 
 ```http
 POST /api/rag/retrieve
+Authorization: Bearer jwt-token
 Content-Type: application/json
 ```
 

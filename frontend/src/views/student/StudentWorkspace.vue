@@ -315,8 +315,8 @@ const mathShortcuts = [
   { label: 'x^2', value: 'x^2' },
   { label: 'sin(x)', value: 'sin(x)' },
   { label: 'cos(x)', value: 'cos(x)' },
-  { label: 'e^x', value: 'e^x' },
-  { label: 'ln(x)', value: 'ln(x)' },
+  { label: 'e^x', value: 'exp(x)' },
+  { label: 'ln(x)', value: 'log(x)' },
   { label: '()', value: '()' }
 ]
 

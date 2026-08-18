@@ -12,6 +12,17 @@
 - 可观测性：Agent 日志记录模型名、Token 消耗、耗时、状态和失败原因；LLM 调用失败会返回分类错误。
 - 持久化：默认内存模式可快速启动；`dev` profile 使用 MySQL 保存业务数据，并使用 Redis 缓存热点学习会话。
 
+## 功能截图
+
+- 学生端
+
+  <img width="1763" height="1321" alt="学生端" src="https://github.com/user-attachments/assets/17cfa937-25fd-456b-ad7e-d05e7e385e79" />
+
+- 管理端
+
+  <img width="1763" height="1368" alt="管理端" src="https://github.com/user-attachments/assets/be3c0e8f-c9a6-442e-a063-a8ccbdfd66a0" />
+
+  
 ## 技术栈
 
 - 后端：Java 17、Spring Boot 3.3、Spring Web、Spring Security、Spring Validation、Spring Data Redis、MySQL、Springdoc OpenAPI、exp4j。
@@ -37,8 +48,8 @@ Agent_Study/
 内存模式不依赖 MySQL/Redis，适合快速查看接口和页面流程。
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run
+cd .\backend
+& "..\.tools\apache-maven-3.9.9\bin\mvn.cmd" "-Dmaven.repo.local=..\.m2\repository" spring-boot:run
 ```
 
 ### 2. 启动后端：MySQL/Redis 模式
@@ -46,11 +57,10 @@ cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
 如果使用项目自带 Docker 环境：
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
 docker compose -f .\docker\docker-compose.yml up -d
 
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" spring-boot:run "-Dspring-boot.run.profiles=dev"
+cd .\backend
+& "..\.tools\apache-maven-3.9.9\bin\mvn.cmd" "-Dmaven.repo.local=..\.m2\repository" spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 Docker 默认连接信息：
@@ -61,6 +71,8 @@ MySQL 用户名: root
 MySQL 密码: agentstudy
 Redis: localhost:6379
 ```
+
+`dev` profile 启动后会自动建表，并补齐默认 Prompt 模板和默认知识切片。
 
 如果使用本机已有 MySQL，可以在启动后端前覆盖环境变量：
 
@@ -89,7 +101,7 @@ $env:AGENT_STUDY_LLM_FALLBACK_TO_MOCK="false"
 ### 4. 启动前端
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\frontend
+cd .\frontend
 npm.cmd install --cache ..\.npm-cache
 npm.cmd run dev
 ```
@@ -125,21 +137,19 @@ http://localhost:8080/v3/api-docs/agent-study
 后端测试：
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" "-Dmaven.repo.local=D:\Users\Desktop\NUIT_STUDY\Agent_Study\.m2\repository" test
+cd .\backend
+& "..\.tools\apache-maven-3.9.9\bin\mvn.cmd" "-Dmaven.repo.local=..\.m2\repository" test
 ```
 
 前端构建：
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\frontend
+cd .\frontend
 npm.cmd run build
 ```
 
 ## 文档索引
 
-- [后端说明](backend/README.md)
-- [前端说明](frontend/README.md)
 - [API 文档](docs/api.md)
 - [后台 API 文档](docs/admin-api.md)
 - [Agent API 文档](docs/agent-api.md)

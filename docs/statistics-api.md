@@ -6,10 +6,13 @@
 /api/statistics
 ```
 
+查询接口需要管理员 Bearer Token。
+
 ## 查询学习统计仪表盘
 
 ```http
 GET /api/statistics/dashboard
+Authorization: Bearer jwt-token
 ```
 
 返回学习会话状态、薄弱点分布，以及最近 100 次 Agent 调用统计。

@@ -155,13 +155,13 @@
 - `idx_operation_log_target_created`: 按对象查看操作链路。
 - `idx_operation_log_action_created`: 按动作筛选。
 
-DDL 文件：
+参考 DDL 文件：
 
 ```text
 backend/src/main/resources/db/schema-mysql.sql
 ```
 
-`dev` profile 下后端启动时会自动执行建表语句。
+`dev` profile 下后端启动时由 MySQL 仓库初始化逻辑自动建表，并在默认数据缺失时补齐内置 Prompt 模板和知识切片。
 
 ## Redis 缓存
 

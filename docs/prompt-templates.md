@@ -5,7 +5,7 @@
 - 默认 profile 使用内存 `PromptTemplateRepository`。
 - `dev` profile 使用 MySQL `prompt_template` 表。
 - 启动时会自动补齐 5 个默认模板。
-- 可以通过 `PUT /api/agent/prompts/{code}` 新增或更新模板，该写接口需要管理员 Bearer Token。
+- `GET /api/agent/prompts` 查询模板列表，`PUT /api/agent/prompts/{code}` 新增或更新模板，二者都需要管理员 Bearer Token。
 - 每次新增或更新都会写入 `prompt_template_version`，后台可查询版本历史并激活旧版本。
 
 ## 模板列表

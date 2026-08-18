@@ -87,25 +87,24 @@ Implemented:
 Run backend tests:
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" test
+cd .\backend
+& "..\.tools\apache-maven-3.9.9\bin\mvn.cmd" "-Dmaven.repo.local=..\.m2\repository" test
 ```
 
 Run backend with in-memory repository:
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run
+cd .\backend
+& "..\.tools\apache-maven-3.9.9\bin\mvn.cmd" "-Dmaven.repo.local=..\.m2\repository" spring-boot:run
 ```
 
 Run backend with MySQL and Redis:
 
 ```powershell
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study
 docker compose -f .\docker\docker-compose.yml up -d
 
-cd D:\Users\Desktop\NUIT_STUDY\Agent_Study\backend
-& "C:\Maven\apache-maven-3.8.2\bin\mvn.cmd" spring-boot:run "-Dspring-boot.run.profiles=dev"
+cd .\backend
+& "..\.tools\apache-maven-3.9.9\bin\mvn.cmd" "-Dmaven.repo.local=..\.m2\repository" spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
 ## Development Rules

@@ -448,11 +448,11 @@ async function loadAll() {
 }
 
 async function loadStatistics() {
-  statistics.value = await statisticsApi.dashboard()
+  statistics.value = await statisticsApi.dashboard(auth.token)
 }
 
 async function loadPrompts() {
-  prompts.value = await agentApi.listPrompts()
+  prompts.value = await agentApi.listPrompts(auth.token)
   if (!selectedPrompt.value && prompts.value.length) {
     selectPrompt(prompts.value[0])
   }
@@ -502,7 +502,7 @@ async function activatePromptVersion(version) {
 }
 
 async function loadChunks() {
-  chunks.value = await ragApi.listChunks()
+  chunks.value = await ragApi.listChunks(auth.token)
 }
 
 function selectChunk(chunk) {
@@ -551,7 +551,7 @@ async function rebuildEmbedding() {
 
 async function retrieveChunks() {
   await run(async () => {
-    retrievedChunks.value = await ragApi.retrieve(splitText(retrieveKeywords.value), 5)
+    retrievedChunks.value = await ragApi.retrieve(auth.token, splitText(retrieveKeywords.value), 5)
   })
 }
 
@@ -570,7 +570,7 @@ async function loadOperationLogs() {
 }
 
 async function loadAgentLogs() {
-  agentLogs.value = await agentApi.listCallLogs({ limit: 30 })
+  agentLogs.value = await agentApi.listCallLogs(auth.token, { limit: 30 })
 }
 
 function splitText(value) {

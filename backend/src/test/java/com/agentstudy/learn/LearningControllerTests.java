@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -167,8 +169,10 @@ class LearningControllerTests {
         assertThat(getResponse.getBody().path("data").path("currentStep").asInt()).isEqualTo(2);
         assertThat(getResponse.getBody().path("data").path("nextAction").asText()).isEqualTo("plan");
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs?limit=10",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
         assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
@@ -229,8 +233,10 @@ class LearningControllerTests {
         assertThat(data.path("plan").path("days").size()).isEqualTo(3);
         assertThat(data.path("plan").path("days").get(0).path("concepts").toString()).contains("链式法则");
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs?limit=10",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
         assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
@@ -293,8 +299,10 @@ class LearningControllerTests {
         assertThat(data.path("lessonMarkdown").asText()).contains("Mock讲义");
         assertThat(data.path("retrievedChunks").size()).isGreaterThan(0);
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs?limit=10",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
         assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
@@ -325,8 +333,10 @@ class LearningControllerTests {
         assertThat(data.path("questions").size()).isEqualTo(3);
         assertThat(data.path("questions").get(0).has("standardAnswer")).isFalse();
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs?limit=10",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
         assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
@@ -424,8 +434,10 @@ class LearningControllerTests {
         assertThat(getResponse.getBody().path("data").path("status").asText()).isEqualTo("FINISHED");
         assertThat(getResponse.getBody().path("data").path("nextAction").asText()).isEqualTo("finished");
 
-        ResponseEntity<JsonNode> logResponse = restTemplate.getForEntity(
+        ResponseEntity<JsonNode> logResponse = restTemplate.exchange(
                 "/api/agent/call-logs?limit=10",
+                HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()),
                 JsonNode.class
         );
         assertThat(logResponse.getBody().path("data").toString()).contains(sessionId);
@@ -577,5 +589,20 @@ class LearningControllerTests {
 
     private Map<String, String> answer(String questionId, String selectedOption) {
         return Map.of("questionId", questionId, "selectedOption", selectedOption);
+    }
+
+    private HttpHeaders adminHeaders() {
+        ResponseEntity<JsonNode> loginResponse = restTemplate.postForEntity(
+                "/api/admin/auth/login",
+                Map.of("username", "admin", "password", "agentstudy"),
+                JsonNode.class
+        );
+
+        assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String token = loginResponse.getBody().path("data").path("accessToken").asText();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 }
